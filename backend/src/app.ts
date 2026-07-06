@@ -27,7 +27,10 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// TODO: Register actual feature routers here e.g., app.use('/api/auth', authRouter)
+// Register feature routers
+import projectRouter from './routes/projects/projectRoutes';
+app.use('/api/projects', projectRouter);
+
 
 // Fallback Middlewares
 app.use(notFound);
