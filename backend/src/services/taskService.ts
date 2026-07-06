@@ -1,6 +1,7 @@
 import Task, { ITask } from '../models/Task';
 import Project from '../models/Project';
 import Employee, { IEmployee } from '../models/Employee';
+import Sprint from '../models/Sprint';
 import mongoose from 'mongoose';
 
 // Helper to verify project existence and check task due date limits
@@ -20,7 +21,7 @@ const validateTaskDateAndProject = async (projectId: string, dueDate?: Date) => 
 
 export const taskService = {
   create: async (projectId: string, data: any, orgId: string): Promise<ITask> => {
-    const { title, description, priority, status, assignedToId, dueDate } = data;
+    const { title, description, priority, status, assignedToId, sprintId, dueDate } = data;
 
     // Validate project & due date boundary
     await validateTaskDateAndProject(projectId, dueDate);
@@ -33,9 +34,18 @@ export const taskService = {
       }
     }
 
+    // Verify sprint belongs to the project if provided
+    if (sprintId && sprintId !== '') {
+      const sprint = await Sprint.findOne({ _id: sprintId, projectId });
+      if (!sprint) {
+        throw new Error('Sprint not found in this project');
+      }
+    }
+
     const task = new Task({
       projectId,
       assignedToId: assignedToId || undefined,
+      sprintId: sprintId || undefined,
       title,
       description,
       priority,
@@ -57,20 +67,32 @@ export const taskService = {
     if (filters.assignedToId) {
       query.assignedToId = filters.assignedToId === 'unassigned' ? null : filters.assignedToId;
     }
+    if (filters.sprintId) {
+      query.sprintId = filters.sprintId === 'backlog' ? null : filters.sprintId;
+    }
 
     return await Task.find(query)
       .populate({
         path: 'assignedToId',
         select: 'name email role employeeId',
       })
+      .populate({
+        path: 'sprintId',
+        select: 'name startDate endDate status',
+      })
       .sort({ createdAt: -1 });
   },
 
   getById: async (projectId: string, taskId: string): Promise<ITask | null> => {
-    return await Task.findOne({ _id: taskId, projectId }).populate({
-      path: 'assignedToId',
-      select: 'name email role employeeId',
-    });
+    return await Task.findOne({ _id: taskId, projectId })
+      .populate({
+        path: 'assignedToId',
+        select: 'name email role employeeId',
+      })
+      .populate({
+        path: 'sprintId',
+        select: 'name startDate endDate status',
+      });
   },
 
   update: async (projectId: string, taskId: string, data: any, orgId: string): Promise<ITask | null> => {
@@ -79,7 +101,7 @@ export const taskService = {
       return null;
     }
 
-    const { title, description, priority, status, assignedToId, dueDate } = data;
+    const { title, description, priority, status, assignedToId, sprintId, dueDate } = data;
 
     // Boundary check if dueDate is being updated
     if (dueDate) {
@@ -99,6 +121,17 @@ export const taskService = {
       task.assignedToId = undefined;
     }
 
+    // Verify sprint if updated
+    if (sprintId && sprintId !== '') {
+      const sprint = await Sprint.findOne({ _id: sprintId, projectId });
+      if (!sprint) {
+        throw new Error('Sprint not found in this project');
+      }
+      task.sprintId = new mongoose.Types.ObjectId(sprintId);
+    } else if (sprintId === '' || sprintId === null) {
+      task.sprintId = undefined;
+    }
+
     if (title !== undefined) task.title = title;
     if (description !== undefined) task.description = description;
     if (priority !== undefined) task.priority = priority;
@@ -107,10 +140,15 @@ export const taskService = {
 
     await task.save();
 
-    return await Task.findById(taskId).populate({
-      path: 'assignedToId',
-      select: 'name email role employeeId',
-    });
+    return await Task.findById(taskId)
+      .populate({
+        path: 'assignedToId',
+        select: 'name email role employeeId',
+      })
+      .populate({
+        path: 'sprintId',
+        select: 'name startDate endDate status',
+      });
   },
 
   updateStatus: async (

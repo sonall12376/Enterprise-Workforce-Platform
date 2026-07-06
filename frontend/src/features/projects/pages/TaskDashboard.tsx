@@ -3,10 +3,11 @@ import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../../../hooks/useAuth';
 import { useTasks } from '../hooks/useTasks';
 import { projectService } from '../services/projectService';
+import { sprintService } from '../services/sprintService';
 import { Project } from '../types/projectTypes';
-import { Task } from '../types/taskTypes';
+import { Task, Sprint } from '../types/taskTypes';
 import { TaskForm } from '../components/TaskForm';
-import { Plus, Search, Filter, ShieldAlert, ArrowLeft, Calendar, Edit, Trash2, Loader2 } from 'lucide-react';
+import { Plus, Search, Filter, ShieldAlert, ArrowLeft, Calendar, Edit, Trash2, Loader2, Flame, X } from 'lucide-react';
 
 export const TaskDashboard: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -14,6 +15,27 @@ export const TaskDashboard: React.FC = () => {
 
   const [project, setProject] = useState<Project | null>(null);
   const [projectLoading, setProjectLoading] = useState(true);
+
+  // Sprints state
+  const [sprints, setSprints] = useState<Sprint[]>([]);
+  const [sprintFilter, setSprintFilter] = useState('All');
+
+  // Sprint Creator Form Modal state
+  const [isSprintModalOpen, setIsSprintModalOpen] = useState(false);
+  const [sprintFormName, setSprintFormName] = useState('');
+  const [sprintFormStart, setSprintFormStart] = useState('');
+  const [sprintFormEnd, setSprintFormEnd] = useState('');
+  const [sprintFormGoal, setSprintFormGoal] = useState('');
+  const [sprintFormStatus, setSprintFormStatus] = useState<'Upcoming' | 'Active'>('Upcoming');
+  const [sprintFormLoading, setSprintFormLoading] = useState(false);
+  const [sprintFormError, setSprintFormError] = useState<string | null>(null);
+
+  // Sprint Completion Modal state
+  const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
+  const [sprintToComplete, setSprintToComplete] = useState<Sprint | null>(null);
+  const [rolloverSprintId, setRolloverSprintId] = useState('');
+  const [completeLoading, setCompleteLoading] = useState(false);
+  const [completeError, setCompleteError] = useState<string | null>(null);
 
   const {
     tasks,
@@ -24,6 +46,7 @@ export const TaskDashboard: React.FC = () => {
     editTask,
     changeTaskStatus,
     removeTask,
+    refetchTasks,
   } = useTasks(projectId || '');
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -48,6 +71,21 @@ export const TaskDashboard: React.FC = () => {
       }
     };
     fetchProjectDetails();
+  }, [projectId]);
+
+  // Fetch Sprints details
+  const fetchSprintsList = async () => {
+    if (!projectId) return;
+    try {
+      const data = await sprintService.getSprints(projectId);
+      setSprints(data);
+    } catch (err) {
+      console.error('Failed to load sprints:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchSprintsList();
   }, [projectId]);
 
   // Fallback dev login
@@ -120,13 +158,90 @@ export const TaskDashboard: React.FC = () => {
     }
   };
 
+  // Sprint CRUD operations
+  const handleSprintSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!sprintFormName || !sprintFormStart || !sprintFormEnd) {
+      setSprintFormError('Name, start date, and end date are required');
+      return;
+    }
+
+    if (new Date(sprintFormEnd) < new Date(sprintFormStart)) {
+      setSprintFormError('End date cannot fall before start date');
+      return;
+    }
+
+    setSprintFormLoading(true);
+    setSprintFormError(null);
+    try {
+      await sprintService.createSprint(projectId || '', {
+        name: sprintFormName,
+        startDate: sprintFormStart,
+        endDate: sprintFormEnd,
+        goal: sprintFormGoal || undefined,
+        status: sprintFormStatus,
+      });
+
+      // Clear form and reload
+      setSprintFormName('');
+      setSprintFormStart('');
+      setSprintFormEnd('');
+      setSprintFormGoal('');
+      setSprintFormStatus('Upcoming');
+      setIsSprintModalOpen(false);
+      await fetchSprintsList();
+    } catch (err: any) {
+      setSprintFormError(err.response?.data?.message || err.message || 'Failed to create sprint');
+    } finally {
+      setSprintFormLoading(false);
+    }
+  };
+
+  const handleCompleteOpen = (sprint: Sprint) => {
+    setSprintToComplete(sprint);
+    setRolloverSprintId('');
+    setCompleteError(null);
+    setIsCompleteModalOpen(true);
+  };
+
+  const handleSprintCompleteSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!sprintToComplete) return;
+
+    setCompleteLoading(true);
+    setCompleteError(null);
+    try {
+      await sprintService.completeSprint(
+        projectId || '',
+        sprintToComplete._id,
+        rolloverSprintId || undefined
+      );
+
+      setIsCompleteModalOpen(false);
+      await fetchSprintsList();
+      await refetchTasks();
+    } catch (err: any) {
+      setCompleteError(err.response?.data?.message || err.message || 'Failed to complete sprint');
+    } finally {
+      setCompleteLoading(false);
+    }
+  };
+
   const filteredTasks = tasks.filter((task) => {
     const matchesSearch =
       task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (task.description || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'All' || task.status === statusFilter;
     const matchesPriority = priorityFilter === 'All' || task.priority === priorityFilter;
-    return matchesSearch && matchesStatus && matchesPriority;
+
+    let matchesSprint = true;
+    if (sprintFilter === 'Backlog') {
+      matchesSprint = !task.sprintId;
+    } else if (sprintFilter !== 'All') {
+      matchesSprint = task.sprintId?._id === sprintFilter;
+    }
+
+    return matchesSearch && matchesStatus && matchesPriority && matchesSprint;
   });
 
   const getPriorityStyle = (priority: string) => {
@@ -153,6 +268,7 @@ export const TaskDashboard: React.FC = () => {
       case 'Review':
         return 'bg-amber-600/20 text-amber-400 border border-amber-500/20';
       case 'Done':
+      case 'Completed':
         return 'bg-emerald-600/20 text-emerald-400 border border-emerald-500/20';
       default:
         return 'bg-slate-800 text-slate-300 border-slate-700';
@@ -184,7 +300,10 @@ export const TaskDashboard: React.FC = () => {
   const todoTasks = tasks.filter((t) => t.status === 'Todo').length;
   const inProgressTasks = tasks.filter((t) => t.status === 'InProgress').length;
   const reviewTasks = tasks.filter((t) => t.status === 'Review').length;
-  const doneTasks = tasks.filter((t) => t.status === 'Done').length;
+  const doneTasks = tasks.filter((t) => t.status === 'Done' || t.status === 'Completed').length;
+
+  const activeSprint = sprints.find((s) => s.status === 'Active');
+  const upcomingSprints = sprints.filter((s) => s.status === 'Upcoming');
 
   if (projectLoading) {
     return (
@@ -229,7 +348,7 @@ export const TaskDashboard: React.FC = () => {
         Back to Projects
       </Link>
 
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
           <div className="flex items-center gap-2.5">
             <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-violet-500/10 text-violet-400 border border-violet-500/20 uppercase">
@@ -241,16 +360,52 @@ export const TaskDashboard: React.FC = () => {
             Create, assign, and track project requirements and tasks completion.
           </p>
         </div>
-        {canModify && (
-          <button
-            onClick={handleCreateOpen}
-            className="flex items-center gap-2 px-5 py-3 rounded-xl text-white bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 font-semibold shadow-lg shadow-violet-950/40 hover:shadow-violet-950/60 transition-all duration-200 hover:-translate-y-0.5 cursor-pointer"
-          >
-            <Plus size={18} />
-            Create Task
-          </button>
-        )}
+        <div className="flex flex-wrap gap-3">
+          {canModify && (
+            <button
+              onClick={() => setIsSprintModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-slate-300 hover:text-white bg-slate-800/80 border border-slate-700 hover:bg-slate-700 font-semibold shadow-md transition-all duration-200 hover:-translate-y-0.5 cursor-pointer text-sm"
+            >
+              <Flame size={16} className="text-violet-400" />
+              New Sprint
+            </button>
+          )}
+          {canModify && (
+            <button
+              onClick={handleCreateOpen}
+              className="flex items-center gap-2 px-5 py-3 rounded-xl text-white bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 font-semibold shadow-lg shadow-violet-950/40 hover:shadow-violet-950/60 transition-all duration-200 hover:-translate-y-0.5 cursor-pointer text-sm"
+            >
+              <Plus size={18} />
+              Create Task
+            </button>
+          )}
+        </div>
       </div>
+
+      {/* Active Sprint Banner */}
+      {activeSprint && (
+        <div className="mb-8 p-6 bg-gradient-to-r from-violet-950/30 to-indigo-950/30 border border-violet-900/40 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 backdrop-blur-md">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-violet-400">
+              <Flame size={18} className="animate-pulse" />
+              <span className="text-xs font-bold uppercase tracking-wider">Active Sprint: {activeSprint.name}</span>
+            </div>
+            {activeSprint.goal && <p className="text-sm font-semibold text-slate-200">Goal: "{activeSprint.goal}"</p>}
+            <p className="text-xs text-slate-400">
+              Duration: {new Date(activeSprint.startDate).toLocaleDateString()} to{' '}
+              {new Date(activeSprint.endDate).toLocaleDateString()}
+            </p>
+          </div>
+          {canModify && (
+            <button
+              onClick={() => handleCompleteOpen(activeSprint)}
+              className="px-4 py-2 text-xs font-bold text-slate-100 bg-violet-600 hover:bg-violet-500 rounded-xl transition-all shadow-md cursor-pointer"
+            >
+              Complete Sprint
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Stats Board */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-10">
@@ -289,7 +444,25 @@ export const TaskDashboard: React.FC = () => {
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4 min-w-[320px]">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 min-w-[480px]">
+          {/* Sprint Filter */}
+          <div className="relative">
+            <Filter className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
+            <select
+              value={sprintFilter}
+              onChange={(e) => setSprintFilter(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-900/50 border border-slate-800 text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent cursor-pointer appearance-none text-sm"
+            >
+              <option value="All">All Sprints</option>
+              <option value="Backlog">Backlog (No Sprint)</option>
+              {sprints.map((s) => (
+                <option key={s._id} value={s._id}>
+                  {s.name} ({s.status})
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="relative">
             <Filter className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
             <select
@@ -355,7 +528,15 @@ export const TaskDashboard: React.FC = () => {
                   <tr key={task._id} className="hover:bg-slate-800/30 transition-colors duration-150">
                     {/* Task Title & Description */}
                     <td className="px-6 py-4 max-w-sm">
-                      <p className="text-slate-100 font-semibold">{task.title}</p>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="text-slate-100 font-semibold">{task.title}</p>
+                        {task.sprintId && (
+                          <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-[10px] font-medium bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                            <Flame size={10} />
+                            {task.sprintId.name}
+                          </span>
+                        )}
+                      </div>
                       {task.description && <p className="text-slate-500 text-xs mt-1 line-clamp-1">{task.description}</p>}
                     </td>
 
@@ -388,6 +569,9 @@ export const TaskDashboard: React.FC = () => {
                         </option>
                         <option value="Done" className="bg-slate-900 text-emerald-400">
                           Done
+                        </option>
+                        <option value="Completed" className="bg-slate-900 text-emerald-400">
+                          Completed
                         </option>
                       </select>
                     </td>
@@ -456,11 +640,180 @@ export const TaskDashboard: React.FC = () => {
         isOpen={isFormOpen}
         task={selectedTask}
         members={members}
+        sprints={sprints}
         onClose={() => setIsFormOpen(false)}
         onSubmit={handleFormSubmit}
         isLoading={formLoading}
         projectEndDate={project?.endDate}
       />
+
+      {/* Sprint Creator Modal */}
+      {isSprintModalOpen && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full overflow-hidden shadow-2xl relative flex flex-col">
+            <div className="flex justify-between items-center px-6 py-4 border-b border-slate-800/80">
+              <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2">
+                <Flame size={20} className="text-violet-400" />
+                Create New Sprint
+              </h2>
+              <button
+                onClick={() => setIsSprintModalOpen(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/80 transition-all duration-150 cursor-pointer"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSprintSubmit} className="p-6 space-y-4">
+              {sprintFormError && (
+                <div className="p-3 bg-rose-600/10 border border-rose-500/20 text-rose-400 rounded-xl text-xs">
+                  {sprintFormError}
+                </div>
+              )}
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-300">Sprint Name</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Sprint 1"
+                  value={sprintFormName}
+                  onChange={(e) => setSprintFormName(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-slate-300">Start Date</label>
+                  <input
+                    type="date"
+                    value={sprintFormStart}
+                    onChange={(e) => setSprintFormStart(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-slate-300">End Date</label>
+                  <input
+                    type="date"
+                    value={sprintFormEnd}
+                    onChange={(e) => setSprintFormEnd(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-300">Sprint Goal</label>
+                <textarea
+                  placeholder="Summarize the core objectives..."
+                  value={sprintFormGoal}
+                  onChange={(e) => setSprintFormGoal(e.target.value)}
+                  rows={2}
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm resize-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-300">Initial Status</label>
+                <select
+                  value={sprintFormStatus}
+                  onChange={(e) => setSprintFormStatus(e.target.value as any)}
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm"
+                >
+                  <option value="Upcoming" className="bg-slate-900">Upcoming</option>
+                  <option value="Active" className="bg-slate-900">Active</option>
+                </select>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-800/80 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setIsSprintModalOpen(false)}
+                  className="px-4 py-2 rounded-xl text-slate-300 hover:text-white bg-slate-805 hover:bg-slate-800 text-sm cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={sprintFormLoading}
+                  className="px-4 py-2 rounded-xl text-white bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-sm font-semibold cursor-pointer disabled:opacity-50"
+                >
+                  {sprintFormLoading ? 'Creating...' : 'Create Sprint'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Sprint Completer Modal */}
+      {isCompleteModalOpen && sprintToComplete && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full overflow-hidden shadow-2xl relative flex flex-col">
+            <div className="flex justify-between items-center px-6 py-4 border-b border-slate-800/80">
+              <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2">
+                <Flame size={20} className="text-violet-400" />
+                Complete Active Sprint
+              </h2>
+              <button
+                onClick={() => setIsCompleteModalOpen(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/80 transition-all duration-150 cursor-pointer"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSprintCompleteSubmit} className="p-6 space-y-4">
+              {completeError && (
+                <div className="p-3 bg-rose-600/10 border border-rose-500/20 text-rose-400 rounded-xl text-xs">
+                  {completeError}
+                </div>
+              )}
+
+              <p className="text-sm text-slate-300">
+                You are about to complete active sprint <strong>{sprintToComplete.name}</strong>.
+              </p>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-300">Rollover Unfinished Tasks To</label>
+                <select
+                  value={rolloverSprintId}
+                  onChange={(e) => setRolloverSprintId(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm"
+                >
+                  <option value="" className="bg-slate-900">Backlog (Unassigned)</option>
+                  {upcomingSprints.map((s) => (
+                    <option key={s._id} value={s._id} className="bg-slate-900">
+                      {s.name} (Upcoming)
+                    </option>
+                  ))}
+                </select>
+                <p className="text-[10px] text-slate-500 mt-1">
+                  Completed tasks will remain associated with this completed sprint for metric logs.
+                </p>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-800/80 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setIsCompleteModalOpen(false)}
+                  className="px-4 py-2 rounded-xl text-slate-300 hover:text-white bg-slate-805 hover:bg-slate-800 text-sm cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={completeLoading}
+                  className="px-4 py-2 rounded-xl text-white bg-violet-600 hover:bg-violet-500 text-sm font-semibold cursor-pointer disabled:opacity-50"
+                >
+                  {completeLoading ? 'Processing...' : 'Complete Sprint'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

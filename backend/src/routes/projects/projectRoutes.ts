@@ -29,4 +29,8 @@ router.delete('/:id', authorize(['SuperAdmin', 'OrgAdmin']), asyncHandler(delete
 import taskRouter from './taskRoutes';
 router.use('/:projectId/tasks', taskRouter);
 
+// Nest sprint routes under projects
+import sprintRouter from './sprintRoutes';
+router.use('/:projectId/sprints', sprintRouter);
+
 export default router;

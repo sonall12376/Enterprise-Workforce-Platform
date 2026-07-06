@@ -4,7 +4,7 @@ import { Task, TaskCreateInput, TaskUpdateInput, Assignee } from '../types/taskT
 export const taskService = {
   getTasks: async (
     projectId: string,
-    filters?: { status?: string; priority?: string; assignedToId?: string }
+    filters?: { status?: string; priority?: string; assignedToId?: string; sprintId?: string }
   ): Promise<Task[]> => {
     const response = await api.get(`/projects/${projectId}/tasks`, { params: filters });
     return response.data.data;

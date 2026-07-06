@@ -23,6 +23,9 @@ const HomePlaceholder = () => {
 
 import ProjectDashboard from '../features/projects/pages/ProjectDashboard';
 import TaskDashboard from '../features/projects/pages/TaskDashboard';
+import AssetDashboard from '../features/assets/pages/AssetDashboard';
+import SupportCenter from '../features/helpdesk/pages/SupportCenter';
+import TicketDetail from '../features/helpdesk/pages/TicketDetail';
 
 export const router = createBrowserRouter([
   {
@@ -36,6 +39,18 @@ export const router = createBrowserRouter([
   {
     path: '/projects/:projectId/tasks',
     element: <TaskDashboard />,
+  },
+  {
+    path: '/assets',
+    element: <AssetDashboard />,
+  },
+  {
+    path: '/helpdesk',
+    element: <SupportCenter />,
+  },
+  {
+    path: '/helpdesk/tickets/:id',
+    element: <TicketDetail />,
   },
   // Feature page paths will be registered here.
 ]);

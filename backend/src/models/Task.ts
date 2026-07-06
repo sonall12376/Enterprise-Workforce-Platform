@@ -3,6 +3,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface ITask extends Document {
   projectId: mongoose.Types.ObjectId;
   assignedToId?: mongoose.Types.ObjectId;
+  sprintId?: mongoose.Types.ObjectId;
   title: string;
   description?: string;
   priority: 'Low' | 'Medium' | 'High' | 'Critical';
@@ -16,6 +17,7 @@ const TaskSchema: Schema = new Schema(
   {
     projectId: { type: Schema.Types.ObjectId, ref: 'Project', required: true },
     assignedToId: { type: Schema.Types.ObjectId, ref: 'Employee' },
+    sprintId: { type: Schema.Types.ObjectId, ref: 'Sprint' },
     title: { type: String, required: true, trim: true, minlength: 2 },
     description: { type: String, trim: true },
     priority: {
@@ -36,6 +38,7 @@ const TaskSchema: Schema = new Schema(
 // Indexes
 TaskSchema.index({ projectId: 1 });
 TaskSchema.index({ assignedToId: 1 });
+TaskSchema.index({ sprintId: 1 });
 
 export const Task = mongoose.model<ITask>('Task', TaskSchema);
 export default Task;

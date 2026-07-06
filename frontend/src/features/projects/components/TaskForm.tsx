@@ -3,14 +3,15 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { X, Loader2 } from 'lucide-react';
-import { Task, Assignee } from '../types/taskTypes';
+import { Task, Assignee, Sprint } from '../types/taskTypes';
 
 const taskFormSchema = z.object({
   title: z.string().min(2, 'Task title must be at least 2 characters').trim(),
   description: z.string().optional().default(''),
   priority: z.enum(['Low', 'Medium', 'High', 'Critical']),
-  status: z.enum(['Todo', 'InProgress', 'Review', 'Done']),
+  status: z.enum(['Todo', 'InProgress', 'Review', 'Done', 'Completed']),
   assignedToId: z.string().optional().or(z.literal('')),
+  sprintId: z.string().optional().or(z.literal('')),
   dueDate: z.string().optional().or(z.literal('')),
 });
 
@@ -19,6 +20,7 @@ type TaskFormData = z.infer<typeof taskFormSchema>;
 interface TaskFormProps {
   task?: Task | null;
   members: Assignee[];
+  sprints: Sprint[];
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: any) => Promise<void>;
@@ -29,6 +31,7 @@ interface TaskFormProps {
 export const TaskForm: React.FC<TaskFormProps> = ({
   task,
   members,
+  sprints,
   isOpen,
   onClose,
   onSubmit,
@@ -49,6 +52,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
       priority: 'Medium',
       status: 'Todo',
       assignedToId: '',
+      sprintId: '',
       dueDate: '',
     },
   });
@@ -61,6 +65,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
         priority: task.priority,
         status: task.status,
         assignedToId: task.assignedToId ? task.assignedToId._id : '',
+        sprintId: task.sprintId ? task.sprintId._id : '',
         dueDate: task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : '',
       });
     } else {
@@ -70,6 +75,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
         priority: 'Medium',
         status: 'Todo',
         assignedToId: '',
+        sprintId: '',
         dueDate: '',
       });
     }
@@ -94,6 +100,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
     const payload = {
       ...data,
       assignedToId: data.assignedToId || undefined,
+      sprintId: data.sprintId || undefined,
       dueDate: data.dueDate || undefined,
     };
     await onSubmit(payload);
@@ -187,7 +194,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Assignee */}
             <div className="space-y-1.5">
               <label className="text-sm font-semibold text-slate-300">Assign To</label>
@@ -206,6 +213,27 @@ export const TaskForm: React.FC<TaskFormProps> = ({
               </select>
               {errors.assignedToId && (
                 <p className="text-xs text-rose-400 font-medium">{errors.assignedToId.message}</p>
+              )}
+            </div>
+
+            {/* Sprint */}
+            <div className="space-y-1.5">
+              <label className="text-sm font-semibold text-slate-300">Sprint</label>
+              <select
+                {...register('sprintId')}
+                className="w-full px-4 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700/80 text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-200"
+              >
+                <option value="" className="bg-slate-900 text-slate-500">
+                  Backlog
+                </option>
+                {sprints.map((sprint) => (
+                  <option key={sprint._id} value={sprint._id} className="bg-slate-900 text-slate-200">
+                    {sprint.name} ({sprint.status})
+                  </option>
+                ))}
+              </select>
+              {errors.sprintId && (
+                <p className="text-xs text-rose-400 font-medium">{errors.sprintId.message}</p>
               )}
             </div>
 
