@@ -18,6 +18,11 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Root API redirection to Health Check
+app.get('/', (req, res) => {
+  res.redirect('/api/health');
+});
+
 // Health Check API
 app.get('/api/health', (req, res) => {
   res.status(200).json({
