@@ -26,6 +26,7 @@ import TaskDashboard from '../features/projects/pages/TaskDashboard';
 import AssetDashboard from '../features/assets/pages/AssetDashboard';
 import SupportCenter from '../features/helpdesk/pages/SupportCenter';
 import TicketDetail from '../features/helpdesk/pages/TicketDetail';
+import AnalyticsConsole from '../features/reports/pages/AnalyticsConsole';
 
 export const router = createBrowserRouter([
   {
@@ -51,6 +52,10 @@ export const router = createBrowserRouter([
   {
     path: '/helpdesk/tickets/:id',
     element: <TicketDetail />,
+  },
+  {
+    path: '/reports',
+    element: <AnalyticsConsole />,
   },
   // Feature page paths will be registered here.
 ]);
