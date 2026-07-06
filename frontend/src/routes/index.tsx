@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
 // Basic landing placeholder
@@ -21,10 +21,21 @@ const HomePlaceholder = () => {
   );
 };
 
+import ProjectDashboard from '../features/projects/pages/ProjectDashboard';
+import TaskDashboard from '../features/projects/pages/TaskDashboard';
+
 export const router = createBrowserRouter([
   {
     path: '/',
     element: <HomePlaceholder />,
+  },
+  {
+    path: '/projects',
+    element: <ProjectDashboard />,
+  },
+  {
+    path: '/projects/:projectId/tasks',
+    element: <TaskDashboard />,
   },
   // Feature page paths will be registered here.
 ]);
