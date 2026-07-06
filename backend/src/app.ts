@@ -37,6 +37,12 @@ app.use('/api/assets', assetRouter);
 import helpDeskRouter from './routes/helpdesk/helpDeskRoutes';
 app.use('/api/helpdesk', helpDeskRouter);
 
+import reportRouter from './routes/reports/reportRoutes';
+app.use('/api/reports', reportRouter);
+
+import aiRouter from './routes/ai/aiRoutes';
+app.use('/api/ai', aiRouter);
+
 
 // Fallback Middlewares
 app.use(notFound);
