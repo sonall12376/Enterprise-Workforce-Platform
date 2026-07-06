@@ -27,6 +27,7 @@ import AssetDashboard from '../features/assets/pages/AssetDashboard';
 import SupportCenter from '../features/helpdesk/pages/SupportCenter';
 import TicketDetail from '../features/helpdesk/pages/TicketDetail';
 import AnalyticsConsole from '../features/reports/pages/AnalyticsConsole';
+import AIAssistantConsole from '../features/ai/pages/AIAssistantConsole';
 
 export const router = createBrowserRouter([
   {
@@ -56,6 +57,10 @@ export const router = createBrowserRouter([
   {
     path: '/reports',
     element: <AnalyticsConsole />,
+  },
+  {
+    path: '/ai-assistant',
+    element: <AIAssistantConsole />,
   },
   // Feature page paths will be registered here.
 ]);
