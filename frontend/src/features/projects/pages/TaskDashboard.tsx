@@ -56,6 +56,47 @@ export const TaskDashboard: React.FC = () => {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
+
+  const handleDragStart = (e: React.DragEvent, taskId: string) => {
+    e.dataTransfer.setData('taskId', taskId);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = async (e: React.DragEvent, targetStatus: any) => {
+    const taskId = e.dataTransfer.getData('taskId');
+    if (!taskId) return;
+    try {
+      await changeTaskStatus(taskId, targetStatus);
+    } catch (err: any) {
+      alert(err.message || 'Failed to update status');
+    }
+  };
+
+  const handleMoveStatus = async (task: Task, direction: 'left' | 'right') => {
+    const statuses: ('Todo' | 'InProgress' | 'Review' | 'Done')[] = ['Todo', 'InProgress', 'Review', 'Done'];
+    const currentStatus = task.status === 'Completed' ? 'Done' : task.status;
+    const currentIndex = statuses.indexOf(currentStatus as any);
+    if (currentIndex === -1) return;
+
+    let newIndex = currentIndex;
+    if (direction === 'left' && currentIndex > 0) {
+      newIndex--;
+    } else if (direction === 'right' && currentIndex < statuses.length - 1) {
+      newIndex++;
+    }
+
+    if (newIndex !== currentIndex) {
+      try {
+        await changeTaskStatus(task._id, statuses[newIndex]);
+      } catch (err: any) {
+        alert(err.message || 'Failed to update status');
+      }
+    }
+  };
 
   // Fetch project details
   useEffect(() => {
@@ -431,6 +472,30 @@ export const TaskDashboard: React.FC = () => {
         </div>
       </div>
 
+      {/* View Mode Toggle */}
+      <div className="flex border-b border-slate-800/80 mb-6">
+        <button
+          onClick={() => setViewMode('list')}
+          className={`px-5 py-3 font-semibold text-sm border-b-2 transition-all cursor-pointer ${
+            viewMode === 'list'
+              ? 'border-violet-500 text-violet-400 font-bold'
+              : 'border-transparent text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          List View
+        </button>
+        <button
+          onClick={() => setViewMode('kanban')}
+          className={`px-5 py-3 font-semibold text-sm border-b-2 transition-all cursor-pointer ${
+            viewMode === 'kanban'
+              ? 'border-violet-500 text-violet-400 font-bold'
+              : 'border-transparent text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          Kanban Board
+        </button>
+      </div>
+
       {/* Filters */}
       <div className="flex flex-col md:flex-row gap-4 mb-8">
         <div className="flex-1 relative">
@@ -509,129 +574,255 @@ export const TaskDashboard: React.FC = () => {
           <Loader2 className="animate-spin text-violet-500" size={40} />
           <p className="text-slate-400 text-sm font-medium">Querying task records...</p>
         </div>
-      ) : filteredTasks.length > 0 ? (
-        <div className="overflow-hidden border border-slate-800/80 bg-slate-900/30 backdrop-blur-md rounded-2xl">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-slate-800/80 bg-slate-900/60 text-slate-400 text-xs font-bold uppercase tracking-wider">
-                  <th className="px-6 py-4">Task Details</th>
-                  <th className="px-6 py-4">Priority</th>
-                  <th className="px-6 py-4">Status</th>
-                  <th className="px-6 py-4">Assignee</th>
-                  <th className="px-6 py-4">Due Date</th>
-                  {canModify && <th className="px-6 py-4 text-right">Actions</th>}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/50 text-sm">
-                {filteredTasks.map((task) => (
-                  <tr key={task._id} className="hover:bg-slate-800/30 transition-colors duration-150">
-                    {/* Task Title & Description */}
-                    <td className="px-6 py-4 max-w-sm">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <p className="text-slate-100 font-semibold">{task.title}</p>
-                        {task.sprintId && (
-                          <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-[10px] font-medium bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                            <Flame size={10} />
-                            {task.sprintId.name}
-                          </span>
-                        )}
-                      </div>
-                      {task.description && <p className="text-slate-500 text-xs mt-1 line-clamp-1">{task.description}</p>}
-                    </td>
-
-                    {/* Priority */}
-                    <td className="px-6 py-4">
-                      <span
-                        className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityStyle(task.priority)}`}
-                      >
-                        {task.priority}
-                      </span>
-                    </td>
-
-                    {/* Status Select dropdown */}
-                    <td className="px-6 py-4">
-                      <select
-                        value={task.status}
-                        onChange={(e) => handleStatusChange(task._id, e.target.value)}
-                        className={`px-3 py-1 rounded-full text-xs font-semibold focus:outline-none cursor-pointer border ${getStatusColor(
-                          task.status
-                        )}`}
-                      >
-                        <option value="Todo" className="bg-slate-900 text-slate-300">
-                          Todo
-                        </option>
-                        <option value="InProgress" className="bg-slate-900 text-blue-400">
-                          InProgress
-                        </option>
-                        <option value="Review" className="bg-slate-900 text-amber-400">
-                          Review
-                        </option>
-                        <option value="Done" className="bg-slate-900 text-emerald-400">
-                          Done
-                        </option>
-                        <option value="Completed" className="bg-slate-900 text-emerald-400">
-                          Completed
-                        </option>
-                      </select>
-                    </td>
-
-                    {/* Assignee */}
-                    <td className="px-6 py-4">
-                      {task.assignedToId ? (
-                        <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-full bg-violet-600/20 border border-violet-500/20 text-violet-400 flex items-center justify-center font-bold text-xs">
-                            {getInitials(task.assignedToId.name)}
-                          </div>
-                          <div>
-                            <p className="text-slate-200 text-xs font-semibold">{task.assignedToId.name}</p>
-                            <p className="text-[10px] text-slate-500">{task.assignedToId.role}</p>
-                          </div>
-                        </div>
-                      ) : (
-                        <span className="text-slate-600 text-xs italic">Unassigned</span>
-                      )}
-                    </td>
-
-                    {/* Due date */}
-                    <td className="px-6 py-4 text-slate-400 text-xs">
-                      <span className="flex items-center gap-1">
-                        <Calendar size={13} className="text-slate-500" />
-                        {formatDate(task.dueDate)}
-                      </span>
-                    </td>
-
-                    {/* Actions */}
-                    {canModify && (
-                      <td className="px-6 py-4 text-right">
-                        <div className="inline-flex gap-2">
-                          <button
-                            onClick={() => handleEditOpen(task)}
-                            className="p-1.5 bg-slate-800/40 hover:bg-violet-600/20 text-slate-400 hover:text-violet-300 rounded-lg border border-slate-700/20 hover:border-violet-500/20 transition-all cursor-pointer"
-                            title="Edit Task"
-                          >
-                            <Edit size={14} />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(task._id)}
-                            className="p-1.5 bg-slate-800/40 hover:bg-rose-600/20 text-slate-400 hover:text-rose-400 rounded-lg border border-slate-700/20 hover:border-rose-500/20 transition-all cursor-pointer"
-                            title="Delete Task"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                      </td>
-                    )}
+      ) : viewMode === 'list' ? (
+        filteredTasks.length > 0 ? (
+          <div className="overflow-hidden border border-slate-800/80 bg-slate-900/30 backdrop-blur-md rounded-2xl">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-800/80 bg-slate-900/60 text-slate-400 text-xs font-bold uppercase tracking-wider">
+                    <th className="px-6 py-4">Task Details</th>
+                    <th className="px-6 py-4">Priority</th>
+                    <th className="px-6 py-4">Status</th>
+                    <th className="px-6 py-4">Assignee</th>
+                    <th className="px-6 py-4">Due Date</th>
+                    {canModify && <th className="px-6 py-4 text-right">Actions</th>}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-800/50 text-sm">
+                  {filteredTasks.map((task) => (
+                    <tr key={task._id} className="hover:bg-slate-800/30 transition-colors duration-150">
+                      {/* Task Title & Description */}
+                      <td className="px-6 py-4 max-w-sm">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="text-slate-100 font-semibold">{task.title}</p>
+                          {task.sprintId && (
+                            <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-[10px] font-medium bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                              <Flame size={10} />
+                              {task.sprintId.name}
+                            </span>
+                          )}
+                        </div>
+                        {task.description && <p className="text-slate-500 text-xs mt-1 line-clamp-1">{task.description}</p>}
+                      </td>
+
+                      {/* Priority */}
+                      <td className="px-6 py-4">
+                        <span
+                          className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityStyle(task.priority)}`}
+                        >
+                          {task.priority}
+                        </span>
+                      </td>
+
+                      {/* Status Select dropdown */}
+                      <td className="px-6 py-4">
+                        <select
+                          value={task.status}
+                          onChange={(e) => handleStatusChange(task._id, e.target.value)}
+                          className={`px-3 py-1 rounded-full text-xs font-semibold focus:outline-none cursor-pointer border ${getStatusColor(
+                            task.status
+                          )}`}
+                        >
+                          <option value="Todo" className="bg-slate-900 text-slate-300">
+                            Todo
+                          </option>
+                          <option value="InProgress" className="bg-slate-900 text-blue-400">
+                            InProgress
+                          </option>
+                          <option value="Review" className="bg-slate-900 text-amber-400">
+                            Review
+                          </option>
+                          <option value="Done" className="bg-slate-900 text-emerald-400">
+                            Done
+                          </option>
+                          <option value="Completed" className="bg-slate-900 text-emerald-400">
+                            Completed
+                          </option>
+                        </select>
+                      </td>
+
+                      {/* Assignee */}
+                      <td className="px-6 py-4">
+                        {task.assignedToId ? (
+                          <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-full bg-violet-600/20 border border-violet-500/20 text-violet-400 flex items-center justify-center font-bold text-xs">
+                              {getInitials(task.assignedToId.name)}
+                            </div>
+                            <div>
+                              <p className="text-slate-200 text-xs font-semibold">{task.assignedToId.name}</p>
+                              <p className="text-[10px] text-slate-500">{task.assignedToId.role}</p>
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-slate-600 text-xs italic">Unassigned</span>
+                        )}
+                      </td>
+
+                      {/* Due date */}
+                      <td className="px-6 py-4 text-slate-400 text-xs">
+                        <span className="flex items-center gap-1">
+                          <Calendar size={13} className="text-slate-500" />
+                          {formatDate(task.dueDate)}
+                        </span>
+                      </td>
+
+                      {/* Actions */}
+                      {canModify && (
+                        <td className="px-6 py-4 text-right">
+                          <div className="inline-flex gap-2">
+                            <button
+                              onClick={() => handleEditOpen(task)}
+                              className="p-1.5 bg-slate-800/40 hover:bg-violet-600/20 text-slate-400 hover:text-violet-300 rounded-lg border border-slate-700/20 hover:border-violet-500/20 transition-all cursor-pointer"
+                              title="Edit Task"
+                            >
+                              <Edit size={14} />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(task._id)}
+                              className="p-1.5 bg-slate-800/40 hover:bg-rose-600/20 text-slate-400 hover:text-rose-400 rounded-lg border border-slate-700/20 hover:border-rose-500/20 transition-all cursor-pointer"
+                              title="Delete Task"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </td>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="text-center py-20 bg-slate-900/20 border border-slate-850 rounded-2xl">
+            <p className="text-slate-400 font-medium">No tasks logged yet</p>
+            <p className="text-slate-500 text-xs mt-1">Add tasks to set goals and deadlines for the team.</p>
+          </div>
+        )
       ) : (
-        <div className="text-center py-20 bg-slate-900/20 border border-slate-850 rounded-2xl">
-          <p className="text-slate-400 font-medium">No tasks logged yet</p>
-          <p className="text-slate-500 text-xs mt-1">Add tasks to set goals and deadlines for the team.</p>
+        /* Kanban Board columns */
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {[
+            { title: 'Todo', status: 'Todo', border: 'border-t-slate-500', bg: 'bg-slate-950/20' },
+            { title: 'In Progress', status: 'InProgress', border: 'border-t-blue-500', bg: 'bg-blue-950/5' },
+            { title: 'In Review', status: 'Review', border: 'border-t-amber-500', bg: 'bg-amber-950/5' },
+            { title: 'Completed', status: 'Done', border: 'border-t-emerald-500', bg: 'bg-emerald-950/5' }
+          ].map((col) => {
+            const laneTasks = filteredTasks.filter((task) => {
+              if (col.status === 'Done') {
+                return task.status === 'Done' || task.status === 'Completed';
+              }
+              return task.status === col.status;
+            });
+
+            return (
+              <div
+                key={col.status}
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, col.status)}
+                className={`flex flex-col min-h-[500px] rounded-2xl border border-slate-800/60 p-4 ${col.bg} border-t-4 ${col.border}`}
+              >
+                <div className="flex justify-between items-center mb-4">
+                  <h4 className="text-sm font-bold text-slate-300 uppercase tracking-wider">{col.title}</h4>
+                  <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-400 text-xs font-bold">
+                    {laneTasks.length}
+                  </span>
+                </div>
+
+                <div className="space-y-4 flex-1 overflow-y-auto max-h-[600px] pr-1">
+                  {laneTasks.length > 0 ? (
+                    laneTasks.map((task) => (
+                      <div
+                        key={task._id}
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, task._id)}
+                        className="bg-slate-900 border border-slate-805 p-4 rounded-xl space-y-3 shadow-md hover:shadow-lg transition-all duration-200 cursor-grab active:cursor-grabbing group"
+                      >
+                        <div className="flex justify-between items-start gap-2">
+                          <h5 className="font-semibold text-sm text-slate-200 line-clamp-2">{task.title}</h5>
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${getPriorityStyle(task.priority)}`}>
+                            {task.priority}
+                          </span>
+                        </div>
+
+                        {task.description && (
+                          <p className="text-slate-500 text-xs line-clamp-2 leading-relaxed">
+                            {task.description}
+                          </p>
+                        )}
+
+                        <div className="flex items-center justify-between pt-2 border-t border-slate-800/60 text-xs text-slate-400">
+                          <span className="flex items-center gap-1 text-[10px]">
+                            <Calendar size={12} className="text-slate-500" />
+                            {formatDate(task.dueDate)}
+                          </span>
+
+                          {task.assignedToId ? (
+                            <div
+                              className="w-6 h-6 rounded-full bg-violet-600/20 border border-violet-500/20 text-violet-400 flex items-center justify-center font-bold text-[10px]"
+                              title={task.assignedToId.name}
+                            >
+                              {getInitials(task.assignedToId.name)}
+                            </div>
+                          ) : (
+                            <span className="text-[10px] text-slate-600 italic">Unassigned</span>
+                          )}
+                        </div>
+
+                        {/* Drag and Move arrows */}
+                        <div className="flex items-center justify-between pt-2 border-t border-slate-800/40">
+                          <div className="flex items-center gap-1">
+                            <button
+                              type="button"
+                              onClick={() => handleMoveStatus(task, 'left')}
+                              disabled={col.status === 'Todo'}
+                              className="px-2 py-1 bg-slate-800/60 hover:bg-slate-700 text-slate-400 hover:text-slate-200 rounded disabled:opacity-30 cursor-pointer text-xs"
+                              title="Move Left"
+                            >
+                              &larr;
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleMoveStatus(task, 'right')}
+                              disabled={col.status === 'Done'}
+                              className="px-2 py-1 bg-slate-800/60 hover:bg-slate-700 text-slate-400 hover:text-slate-200 rounded disabled:opacity-30 cursor-pointer text-xs"
+                              title="Move Right"
+                            >
+                              &rarr;
+                            </button>
+                          </div>
+
+                          {canModify && (
+                            <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button
+                                onClick={() => handleEditOpen(task)}
+                                className="p-1 bg-slate-800/40 hover:bg-violet-600/20 text-slate-400 hover:text-violet-300 rounded border border-slate-700/20 cursor-pointer"
+                                title="Edit"
+                              >
+                                <Edit size={12} />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(task._id)}
+                                className="p-1 bg-slate-800/40 hover:bg-rose-600/20 text-slate-400 hover:text-rose-400 rounded border border-slate-700/20 cursor-pointer"
+                                title="Delete"
+                              >
+                                <Trash2 size={12} />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-10 border border-dashed border-slate-800 rounded-xl text-slate-600 text-xs italic">
+                      No tasks in this stage
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
 
