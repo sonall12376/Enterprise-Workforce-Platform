@@ -31,6 +31,12 @@ app.get('/api/health', (req, res) => {
 import projectRouter from './routes/projects/projectRoutes';
 app.use('/api/projects', projectRouter);
 
+import assetRouter from './routes/assets/assetRoutes';
+app.use('/api/assets', assetRouter);
+
+import helpDeskRouter from './routes/helpdesk/helpDeskRoutes';
+app.use('/api/helpdesk', helpDeskRouter);
+
 
 // Fallback Middlewares
 app.use(notFound);

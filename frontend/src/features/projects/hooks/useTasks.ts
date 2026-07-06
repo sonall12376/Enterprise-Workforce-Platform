@@ -4,7 +4,7 @@ import { Task, TaskCreateInput, TaskUpdateInput, Assignee } from '../types/taskT
 
 export const useTasks = (
   projectId: string,
-  initialFilters?: { status?: string; priority?: string; assignedToId?: string }
+  initialFilters?: { status?: string; priority?: string; assignedToId?: string; sprintId?: string }
 ) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [members, setMembers] = useState<Assignee[]>([]);
