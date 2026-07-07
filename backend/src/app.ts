@@ -5,6 +5,8 @@ import morgan from 'morgan';
 import notFound from './middleware/notFound';
 import errorHandler from './middleware/errorHandler';
 
+import authRoutes from './routes/auth/authRoutes';
+
 const app = express();
 
 // Security Middlewares
@@ -27,7 +29,8 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// TODO: Register actual feature routers here e.g., app.use('/api/auth', authRouter)
+// Register feature routers
+app.use('/api/auth', authRoutes);
 
 // Fallback Middlewares
 app.use(notFound);
