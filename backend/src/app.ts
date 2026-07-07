@@ -6,6 +6,7 @@ import notFound from './middleware/notFound';
 import errorHandler from './middleware/errorHandler';
 import attendanceRouter from './routes/attendance/attendanceRouter';
 import leaveRouter from './routes/leave/leaveRouter';
+import payrollRouter from './routes/payroll/payrollRouter';
 
 const app = express();
 
@@ -32,6 +33,7 @@ app.get('/api/health', (req, res) => {
 // Register feature routers
 app.use('/api/attendance', attendanceRouter);
 app.use('/api/leaves', leaveRouter);
+app.use('/api/payroll', payrollRouter);
 
 // Fallback Middlewares
 app.use(notFound);

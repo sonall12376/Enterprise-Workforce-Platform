@@ -1,6 +1,7 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import AttendancePage from '../features/attendance/pages/AttendancePage';
 import LeavePage from '../features/leave/pages/LeavePage';
+import PayrollPage from '../features/payroll/pages/PayrollPage';
 
 // Basic landing placeholder
 const HomePlaceholder = () => {
@@ -30,6 +31,12 @@ const HomePlaceholder = () => {
           >
             Go to Leave Center
           </a>
+          <a
+            href="/payroll"
+            className="px-4 py-2 bg-indigo-550 hover:bg-indigo-550/80 text-white rounded-lg text-sm font-semibold transition-colors"
+          >
+            Go to Payroll Hub
+          </a>
         </div>
       </div>
     </div>
@@ -48,6 +55,10 @@ export const router = createBrowserRouter([
   {
     path: '/leaves',
     element: <LeavePage />,
+  },
+  {
+    path: '/payroll',
+    element: <PayrollPage />,
   },
   // Feature page paths will be registered here.
 ]);
