@@ -1,5 +1,6 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import AttendancePage from '../features/attendance/pages/AttendancePage';
+import LeavePage from '../features/leave/pages/LeavePage';
 
 // Basic landing placeholder
 const HomePlaceholder = () => {
@@ -16,12 +17,18 @@ const HomePlaceholder = () => {
           <span className="px-2 py-1 text-xs font-semibold bg-sky-950 text-sky-400 rounded-md">Tailwind</span>
           <span className="px-2 py-1 text-xs font-semibold bg-violet-950 text-violet-400 rounded-md">TypeScript</span>
         </div>
-        <div className="pt-4">
+        <div className="pt-4 flex flex-col gap-2">
           <a
             href="/attendance"
-            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-semibold transition-colors"
+            className="px-4 py-2 bg-indigo-650 hover:bg-indigo-650/80 text-white rounded-lg text-sm font-semibold transition-colors"
           >
             Go to Attendance Dashboard
+          </a>
+          <a
+            href="/leaves"
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-semibold transition-colors"
+          >
+            Go to Leave Center
           </a>
         </div>
       </div>
@@ -37,6 +44,10 @@ export const router = createBrowserRouter([
   {
     path: '/attendance',
     element: <AttendancePage />,
+  },
+  {
+    path: '/leaves',
+    element: <LeavePage />,
   },
   // Feature page paths will be registered here.
 ]);
