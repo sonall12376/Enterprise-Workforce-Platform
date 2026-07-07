@@ -1,8 +1,7 @@
-
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
 import { Link } from 'react-router-dom';
-import { Layers, Laptop, BookOpen, BarChart3, Bot } from 'lucide-react';
+import { Layers, Laptop, BookOpen, BarChart3, Bot, Users2, Briefcase } from 'lucide-react';
 
 const HomePlaceholder = () => {
   return (
@@ -82,6 +81,32 @@ const HomePlaceholder = () => {
               Access the chat assistant, policy vector search queries, and resume match analyzer.
             </p>
           </Link>
+
+          <Link
+            to="/employees"
+            className="p-6 bg-slate-900/40 border border-slate-800/80 rounded-2xl hover:border-indigo-500/50 hover:bg-slate-900/60 transition-all duration-300 text-left group shadow-lg cursor-pointer"
+          >
+            <Users2 className="text-indigo-400 mb-4 group-hover:scale-110 transition-transform" size={28} />
+            <h3 className="text-base font-bold text-slate-200 group-hover:text-indigo-400 transition-colors">
+              Employee Directory
+            </h3>
+            <p className="text-slate-400 text-xs mt-2 leading-relaxed">
+              Onboard new employees, manage active directories, shifts, managers, and career timelines.
+            </p>
+          </Link>
+
+          <Link
+            to="/recruitment"
+            className="p-6 bg-slate-900/40 border border-slate-800/80 rounded-2xl hover:border-rose-500/50 hover:bg-slate-900/60 transition-all duration-300 text-left group shadow-lg cursor-pointer"
+          >
+            <Briefcase className="text-rose-400 mb-4 group-hover:scale-110 transition-transform" size={28} />
+            <h3 className="text-base font-bold text-slate-200 group-hover:text-rose-400 transition-colors">
+              Recruitment Board
+            </h3>
+            <p className="text-slate-400 text-xs mt-2 leading-relaxed">
+              Track candidates, schedule interview rounds, score feedback panels, and convert candidates.
+            </p>
+          </Link>
         </div>
 
         <div className="pt-8 border-t border-slate-800/80 flex flex-wrap justify-center gap-2">
@@ -102,6 +127,16 @@ import SupportCenter from '../features/helpdesk/pages/SupportCenter';
 import TicketDetail from '../features/helpdesk/pages/TicketDetail';
 import AnalyticsConsole from '../features/reports/pages/AnalyticsConsole';
 import AIAssistantConsole from '../features/ai/pages/AIAssistantConsole';
+
+// Employee & Recruitment Pages
+import EmployeeDashboard from '../features/employee/pages/EmployeeDashboard';
+import EmployeeList from '../features/employee/pages/EmployeeList';
+import EmployeeDetails from '../features/employee/pages/EmployeeDetails';
+import EmployeeForm from '../features/employee/pages/EmployeeForm';
+import CandidateDashboard from '../features/recruitment/pages/CandidateDashboard';
+import CandidateList from '../features/recruitment/pages/CandidateList';
+import CandidateDetails from '../features/recruitment/pages/CandidateDetails';
+import InterviewManagement from '../features/recruitment/pages/InterviewManagement';
 
 export const router = createBrowserRouter([
   {
@@ -136,7 +171,42 @@ export const router = createBrowserRouter([
     path: '/ai-assistant',
     element: <AIAssistantConsole />,
   },
-  // Feature page paths will be registered here.
+  {
+    path: '/employees',
+    element: <EmployeeDashboard />,
+  },
+  {
+    path: '/employees/directory',
+    element: <EmployeeList />,
+  },
+  {
+    path: '/employees/new',
+    element: <EmployeeForm />,
+  },
+  {
+    path: '/employees/edit/:id',
+    element: <EmployeeForm />,
+  },
+  {
+    path: '/employees/:id',
+    element: <EmployeeDetails />,
+  },
+  {
+    path: '/recruitment',
+    element: <CandidateDashboard />,
+  },
+  {
+    path: '/candidates',
+    element: <CandidateList />,
+  },
+  {
+    path: '/candidates/:id',
+    element: <CandidateDetails />,
+  },
+  {
+    path: '/interviews',
+    element: <InterviewManagement />,
+  },
 ]);
 
 export const AppRouter = () => {
