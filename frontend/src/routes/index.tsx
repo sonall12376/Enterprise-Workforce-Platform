@@ -3,6 +3,7 @@ import AttendancePage from '../features/attendance/pages/AttendancePage';
 import LeavePage from '../features/leave/pages/LeavePage';
 import PayrollPage from '../features/payroll/pages/PayrollPage';
 import PerformancePage from '../features/performance/pages/PerformancePage';
+import NotificationPage from '../features/notification/pages/NotificationPage';
 
 // Basic landing placeholder
 const HomePlaceholder = () => {
@@ -44,6 +45,12 @@ const HomePlaceholder = () => {
           >
             Go to Performance Dashboard
           </a>
+          <a
+            href="/notifications"
+            className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white rounded-lg text-sm font-semibold transition-colors"
+          >
+            Go to Notifications Hub
+          </a>
         </div>
       </div>
     </div>
@@ -70,6 +77,10 @@ export const router = createBrowserRouter([
   {
     path: '/performance',
     element: <PerformancePage />,
+  },
+  {
+    path: '/notifications',
+    element: <NotificationPage />,
   },
   // Feature page paths will be registered here.
 ]);
