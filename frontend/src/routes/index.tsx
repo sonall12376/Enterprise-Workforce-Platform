@@ -1,20 +1,28 @@
-import React from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import AttendancePage from '../features/attendance/pages/AttendancePage';
 
 // Basic landing placeholder
 const HomePlaceholder = () => {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 text-gray-900 font-sans p-6">
-      <div className="max-w-md w-full text-center space-y-4 bg-white p-8 rounded-xl shadow-md border border-gray-100">
-        <h1 className="text-3xl font-extrabold tracking-tight text-indigo-600">Enterprise WFM</h1>
-        <p className="text-gray-600">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-950 text-gray-100 font-sans p-6">
+      <div className="max-w-md w-full text-center space-y-4 bg-slate-900 p-8 rounded-xl shadow-md border border-slate-800">
+        <h1 className="text-3xl font-extrabold tracking-tight text-indigo-500">Enterprise WFM</h1>
+        <p className="text-slate-400">
           This is the root routing setup. Scaffolded feature modules will plug here.
         </p>
-        <div className="pt-4 border-t border-gray-100 flex flex-wrap justify-center gap-2">
-          <span className="px-2 py-1 text-xs font-semibold bg-indigo-50 text-indigo-700 rounded-md">Vite</span>
-          <span className="px-2 py-1 text-xs font-semibold bg-blue-50 text-blue-700 rounded-md">React 19</span>
-          <span className="px-2 py-1 text-xs font-semibold bg-sky-50 text-sky-700 rounded-md">Tailwind</span>
-          <span className="px-2 py-1 text-xs font-semibold bg-violet-50 text-violet-700 rounded-md">TypeScript</span>
+        <div className="pt-4 border-t border-slate-800 flex flex-wrap justify-center gap-2">
+          <span className="px-2 py-1 text-xs font-semibold bg-indigo-950 text-indigo-400 rounded-md">Vite</span>
+          <span className="px-2 py-1 text-xs font-semibold bg-blue-950 text-blue-400 rounded-md">React 19</span>
+          <span className="px-2 py-1 text-xs font-semibold bg-sky-950 text-sky-400 rounded-md">Tailwind</span>
+          <span className="px-2 py-1 text-xs font-semibold bg-violet-950 text-violet-400 rounded-md">TypeScript</span>
+        </div>
+        <div className="pt-4">
+          <a
+            href="/attendance"
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-semibold transition-colors"
+          >
+            Go to Attendance Dashboard
+          </a>
         </div>
       </div>
     </div>
@@ -25,6 +33,10 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: <HomePlaceholder />,
+  },
+  {
+    path: '/attendance',
+    element: <AttendancePage />,
   },
   // Feature page paths will be registered here.
 ]);

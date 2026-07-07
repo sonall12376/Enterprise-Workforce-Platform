@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import notFound from './middleware/notFound';
 import errorHandler from './middleware/errorHandler';
+import attendanceRouter from './routes/attendance/attendanceRouter';
 
 const app = express();
 
@@ -27,7 +28,8 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// TODO: Register actual feature routers here e.g., app.use('/api/auth', authRouter)
+// Register feature routers
+app.use('/api/attendance', attendanceRouter);
 
 // Fallback Middlewares
 app.use(notFound);
