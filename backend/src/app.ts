@@ -7,6 +7,7 @@ import errorHandler from './middleware/errorHandler';
 import attendanceRouter from './routes/attendance/attendanceRouter';
 import leaveRouter from './routes/leave/leaveRouter';
 import payrollRouter from './routes/payroll/payrollRouter';
+import performanceRouter from './routes/performance/performanceRouter';
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/attendance', attendanceRouter);
 app.use('/api/leaves', leaveRouter);
 app.use('/api/payroll', payrollRouter);
+app.use('/api/performance', performanceRouter);
 
 // Fallback Middlewares
 app.use(notFound);
