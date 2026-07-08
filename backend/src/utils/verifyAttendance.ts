@@ -1,9 +1,12 @@
 import mongoose from 'mongoose';
+import dotenv from 'dotenv';
 import Attendance from '../models/Attendance';
 import AttendanceCorrection from '../models/AttendanceCorrection';
 
-// Dedicated test database
-const TEST_MONGODB_URI = 'mongodb://localhost:27017/enterprise-workforce-test';
+dotenv.config();
+
+// Dedicated test database (falls back to process.env.MONGODB_URI)
+const TEST_MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/enterprise-workforce-test';
 
 // Dynamically reference models
 const getEmployeeModel = () => {

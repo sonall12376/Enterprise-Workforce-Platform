@@ -1,6 +1,6 @@
 # Enterprise Workforce Management Platform
 
-An enterprise-grade Workforce Management Platform built with React, Vite, Node.js, Express, and MongoDB. This platform features a high-performance feature-based frontend architecture and a modular domain-driven backend routing system to support rapid growth and concurrent development.
+An enterprise-grade Workforce Management Platform built with React, Vite, Node.js, Express, and MongoDB Atlas. This platform features a high-performance feature-based frontend architecture and a modular domain-driven backend routing system to support rapid growth and concurrent development.
 
 ---
 
@@ -121,7 +121,7 @@ enterprise-workforce-platform/
 
 ### Prerequisites
 - Node.js (v18+ recommended)
-- MongoDB running locally or an Atlas connection URI
+- MongoDB Atlas cluster connection URI (configured in your backend's .env file)
 
 ### Installation
 
