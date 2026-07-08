@@ -68,24 +68,30 @@ const RenderBarChart: React.FC<{
   const maxVal = Math.max(...data.map((d) => d.value), 1);
   return (
     <div className="space-y-6">
-      <div className="flex items-end justify-between gap-4 h-48 pt-4 px-2 border-b border-slate-800">
+      <div className="flex items-end justify-between gap-4 h-48 pt-4 px-2 border-b border-slate-800/80">
         {data.map((item, idx) => {
-          const heightPercent = (item.value / maxVal) * 80;
+          const heightPercent = (item.value / maxVal) * 85;
           return (
-            <div key={idx} className="flex-1 flex flex-col items-center gap-2 group relative">
-              <div className="absolute -top-8 px-2 py-1 rounded bg-slate-950 border border-slate-800 text-[10px] font-bold text-slate-200 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
-                {item.value} Projects ({total > 0 ? ((item.value / total) * 100).toFixed(0) : 0}%)
+            <div key={idx} className="flex-1 flex flex-col items-center justify-end h-full gap-2 group relative pb-1">
+              {/* Tooltip */}
+              <div className="absolute -top-6 px-2 py-1 rounded bg-slate-950 border border-slate-800 text-[10px] font-bold text-slate-200 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap z-10 shadow-xl">
+                {item.value.toLocaleString()} ({total > 0 ? ((item.value / total) * 100).toFixed(0) : 0}%)
               </div>
               
+              {/* Animated Glowing Bar */}
               <div
-                className="w-full sm:w-10 rounded-t-lg transition-all duration-500 hover:brightness-110 cursor-pointer"
+                className="w-6 sm:w-8 rounded-t-lg transition-all duration-500 hover:brightness-125 cursor-pointer relative shadow-[0_0_15px_-3px_rgba(0,0,0,0.3)]"
                 style={{
                   height: `${heightPercent || 4}%`,
                   backgroundColor: item.color,
+                  boxShadow: `0 0 12px -2px ${item.color}50`
                 }}
-              />
+              >
+                {/* Micro-animation gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-white/10 rounded-t-lg" />
+              </div>
               
-              <span className="text-[10px] text-slate-400 font-medium tracking-wide truncate max-w-full text-center mt-1">
+              <span className="text-[10px] text-slate-400 font-bold tracking-wider truncate max-w-full text-center mt-1 uppercase">
                 {item.label}
               </span>
             </div>
@@ -209,55 +215,6 @@ export const AnalyticsConsole: React.FC = () => {
     loadAnalyticsData();
   }, [user]);
 
-  const handleRoleChange = (role: string) => {
-    login('dummy-token', {
-      id: '603d2e1b12cf000000000005',
-      name: 'Sarah Connor',
-      email: 'sarah.connor@wfm.com',
-      role: role,
-      orgId: '603d2e1b12cf000000000001',
-    });
-  };
-
-  const currentRole = user?.role || 'OrgAdmin';
-  const hasAccess = ['SuperAdmin', 'OrgAdmin', 'Manager'].includes(currentRole);
-
-  if (!hasAccess) {
-    return (
-      <div className="min-h-screen bg-[#0b0f19] text-slate-100 font-sans p-6 md:p-10 flex flex-col items-center justify-center">
-        {/* Dev Sandbox Role Switcher */}
-        <div className="w-full max-w-xl mb-8 p-4 bg-slate-900/50 border border-slate-800/80 rounded-2xl flex flex-wrap items-center justify-between gap-4 backdrop-blur-md">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-violet-500 animate-pulse" />
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">🔧 Dev Sandbox: Role Switcher</span>
-          </div>
-          <div className="flex gap-2">
-            {['SuperAdmin', 'OrgAdmin', 'Manager', 'Employee'].map((role) => (
-              <button
-                key={role}
-                onClick={() => handleRoleChange(role)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold border cursor-pointer ${
-                  currentRole === role
-                    ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white border-transparent'
-                    : 'bg-slate-800 text-slate-400 border-slate-700/60'
-                }`}
-              >
-                {role}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="max-w-md w-full p-8 bg-slate-900 border border-slate-800 rounded-3xl text-center space-y-4 shadow-2xl">
-          <ShieldAlert size={48} className="mx-auto text-rose-500 animate-bounce" />
-          <h2 className="text-xl font-bold text-slate-100">Access Restricted</h2>
-          <p className="text-slate-400 text-sm leading-relaxed">
-            The Analytics Console is restricted to administrative and management roles only. Switch your sandbox role above to test access states.
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   // Map project stats for bar charts
   const mappedProjects = projectStats
@@ -319,28 +276,7 @@ export const AnalyticsConsole: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#0b0f19] text-slate-100 font-sans p-6 md:p-10">
-      {/* Dev Sandbox Role Switcher */}
-      <div className="mb-8 p-4 bg-slate-900/50 border border-slate-800/80 rounded-2xl flex flex-wrap items-center justify-between gap-4 backdrop-blur-md">
-        <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-violet-500 animate-pulse" />
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-400">🔧 Dev Sandbox: Role Switcher</span>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {['SuperAdmin', 'OrgAdmin', 'Manager', 'Employee'].map((role) => (
-            <button
-              key={role}
-              onClick={() => handleRoleChange(role)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all duration-200 cursor-pointer ${
-                currentRole === role
-                  ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white border-transparent shadow-lg shadow-violet-950/40'
-                  : 'bg-slate-800/60 text-slate-400 border-slate-700/60 hover:text-slate-200'
-              }`}
-            >
-              {role}
-            </button>
-          ))}
-        </div>
-      </div>
+
 
       {/* Header */}
       <div className="mb-8">

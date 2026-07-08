@@ -78,10 +78,10 @@ export function LoginPage() {
     return (
       <div className="min-h-screen relative flex items-center justify-center bg-slate-950 overflow-hidden font-sans p-4 md:p-8">
         {/* Decorative Background Elements */}
-        <div className="absolute top-[-25%] left-[-15%] w-[600px] h-[600px] rounded-full bg-indigo-600/10 blur-[130px] pointer-events-none" />
-        <div className="absolute bottom-[-25%] right-[-15%] w-[600px] h-[600px] rounded-full bg-violet-600/10 blur-[130px] pointer-events-none" />
+        <div className="absolute top-[-25%] left-[-15%] w-[600px] h-[600px] rounded-full bg-indigo-600/10 blur-[130px] pointer-events-none animate-blob-float-1" />
+        <div className="absolute bottom-[-25%] right-[-15%] w-[600px] h-[600px] rounded-full bg-violet-600/10 blur-[130px] pointer-events-none animate-blob-float-2" />
 
-        <div className="max-w-4xl w-full z-10 space-y-10 animate-fade-in text-center md:text-left">
+        <div className="max-w-4xl w-full z-10 space-y-10 animate-fade-in-up text-center md:text-left">
           {/* Brand Header */}
           <div className="flex flex-col md:flex-row items-center justify-between border-b border-slate-800/80 pb-6 gap-4">
             <div className="flex items-center gap-3">
@@ -175,11 +175,11 @@ export function LoginPage() {
   return (
     <div className="min-h-screen relative flex items-center justify-center bg-slate-950 overflow-hidden font-sans p-4">
       {/* Decorative Background Elements */}
-      <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-indigo-600/10 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-violet-600/10 blur-[120px] pointer-events-none" />
+      <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-indigo-600/10 blur-[120px] pointer-events-none animate-blob-float-1" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-violet-600/10 blur-[120px] pointer-events-none animate-blob-float-2" />
       
       {/* Login Card */}
-      <div className="w-full max-w-md z-10">
+      <div className="w-full max-w-md z-10 animate-fade-in-up">
         <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-2xl shadow-2xl p-8 space-y-6 transform transition-all duration-300 hover:border-indigo-500/30">
           
           {/* Header */}

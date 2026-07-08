@@ -20,8 +20,8 @@ router.get('/managers', authorize(['SuperAdmin', 'OrgAdmin', 'Manager']), asyncH
 
 // Project CRUD endpoints
 router.post('/', authorize(['SuperAdmin', 'OrgAdmin', 'Manager']), asyncHandler(createProject));
-router.get('/', authorize(['SuperAdmin', 'OrgAdmin', 'Manager', 'Employee']), asyncHandler(getAllProjects));
-router.get('/:id', authorize(['SuperAdmin', 'OrgAdmin', 'Manager', 'Employee']), asyncHandler(getProjectById));
+router.get('/', authorize(['SuperAdmin', 'OrgAdmin', 'HR', 'Manager', 'Employee']), asyncHandler(getAllProjects));
+router.get('/:id', authorize(['SuperAdmin', 'OrgAdmin', 'HR', 'Manager', 'Employee']), asyncHandler(getProjectById));
 router.put('/:id', authorize(['SuperAdmin', 'OrgAdmin', 'Manager']), asyncHandler(updateProject));
 router.delete('/:id', authorize(['SuperAdmin', 'OrgAdmin']), asyncHandler(deleteProject));
 

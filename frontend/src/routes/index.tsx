@@ -77,19 +77,35 @@ export const router = createBrowserRouter([
       },
       {
         path: '/attendance',
-        element: <AttendancePage />,
+        element: (
+          <ProtectedRoute allowedRoles={['SuperAdmin', 'HR', 'Employee']}>
+            <AttendancePage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: '/leaves',
-        element: <LeavePage />,
+        element: (
+          <ProtectedRoute allowedRoles={['SuperAdmin', 'HR', 'Manager', 'Employee']}>
+            <LeavePage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: '/payroll',
-        element: <PayrollPage />,
+        element: (
+          <ProtectedRoute allowedRoles={['SuperAdmin', 'HR', 'Employee']}>
+            <PayrollPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: '/performance',
-        element: <PerformancePage />,
+        element: (
+          <ProtectedRoute allowedRoles={['SuperAdmin', 'Manager', 'Employee']}>
+            <PerformancePage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: '/notifications',
@@ -97,15 +113,27 @@ export const router = createBrowserRouter([
       },
       {
         path: '/projects',
-        element: <ProjectDashboard />,
+        element: (
+          <ProtectedRoute allowedRoles={['SuperAdmin', 'OrgAdmin', 'HR', 'Manager', 'Employee']}>
+            <ProjectDashboard />
+          </ProtectedRoute>
+        ),
       },
       {
         path: '/projects/:projectId/tasks',
-        element: <TaskDashboard />,
+        element: (
+          <ProtectedRoute allowedRoles={['SuperAdmin', 'OrgAdmin', 'HR', 'Manager', 'Employee']}>
+            <TaskDashboard />
+          </ProtectedRoute>
+        ),
       },
       {
         path: '/assets',
-        element: <AssetDashboard />,
+        element: (
+          <ProtectedRoute allowedRoles={['SuperAdmin', 'OrgAdmin']}>
+            <AssetDashboard />
+          </ProtectedRoute>
+        ),
       },
       {
         path: '/helpdesk',
@@ -117,7 +145,11 @@ export const router = createBrowserRouter([
       },
       {
         path: '/reports',
-        element: <AnalyticsConsole />,
+        element: (
+          <ProtectedRoute allowedRoles={['SuperAdmin', 'OrgAdmin', 'HR', 'Manager']}>
+            <AnalyticsConsole />
+          </ProtectedRoute>
+        ),
       },
       {
         path: '/ai-assistant',
@@ -125,39 +157,75 @@ export const router = createBrowserRouter([
       },
       {
         path: '/employees',
-        element: <EmployeeDashboard />,
+        element: (
+          <ProtectedRoute allowedRoles={['SuperAdmin', 'OrgAdmin', 'HR']}>
+            <EmployeeDashboard />
+          </ProtectedRoute>
+        ),
       },
       {
         path: '/employees/directory',
-        element: <EmployeeList />,
+        element: (
+          <ProtectedRoute allowedRoles={['SuperAdmin', 'OrgAdmin', 'HR']}>
+            <EmployeeList />
+          </ProtectedRoute>
+        ),
       },
       {
         path: '/employees/new',
-        element: <EmployeeForm />,
+        element: (
+          <ProtectedRoute allowedRoles={['SuperAdmin', 'OrgAdmin', 'HR']}>
+            <EmployeeForm />
+          </ProtectedRoute>
+        ),
       },
       {
         path: '/employees/edit/:id',
-        element: <EmployeeForm />,
+        element: (
+          <ProtectedRoute allowedRoles={['SuperAdmin', 'OrgAdmin', 'HR']}>
+            <EmployeeForm />
+          </ProtectedRoute>
+        ),
       },
       {
         path: '/employees/:id',
-        element: <EmployeeDetails />,
+        element: (
+          <ProtectedRoute allowedRoles={['SuperAdmin', 'OrgAdmin', 'HR']}>
+            <EmployeeDetails />
+          </ProtectedRoute>
+        ),
       },
       {
         path: '/recruitment',
-        element: <CandidateDashboard />,
+        element: (
+          <ProtectedRoute allowedRoles={['SuperAdmin', 'OrgAdmin', 'HR', 'Manager']}>
+            <CandidateDashboard />
+          </ProtectedRoute>
+        ),
       },
       {
         path: '/candidates',
-        element: <CandidateList />,
+        element: (
+          <ProtectedRoute allowedRoles={['SuperAdmin', 'OrgAdmin', 'HR', 'Manager']}>
+            <CandidateList />
+          </ProtectedRoute>
+        ),
       },
       {
         path: '/candidates/:id',
-        element: <CandidateDetails />,
+        element: (
+          <ProtectedRoute allowedRoles={['SuperAdmin', 'OrgAdmin', 'HR', 'Manager']}>
+            <CandidateDetails />
+          </ProtectedRoute>
+        ),
       },
       {
         path: '/interviews',
-        element: <InterviewManagement />,
+        element: (
+          <ProtectedRoute allowedRoles={['SuperAdmin', 'OrgAdmin', 'HR', 'Manager']}>
+            <InterviewManagement />
+          </ProtectedRoute>
+        ),
       },
       {
         path: '/organization/settings',

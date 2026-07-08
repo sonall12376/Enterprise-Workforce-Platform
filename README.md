@@ -4,6 +4,26 @@ An enterprise-grade Workforce Management Platform built with React, Vite, Node.j
 
 ---
 
+## 🎯 Project Overview & Problem Statement
+
+### The Problem Statement
+Managing a modern, scaling enterprise workforce involves coordinating highly fragmented business operations. Traditional organizations suffer from disconnected operational silos:
+- **Manual Overhead & Paper Trails**: Fragmented tools for managing leave balances, payroll slips, and equipment asset allocations.
+- **Attendance Leakage & Geolocation Verification**: The lack of coordinate validation leads to inaccurate check-ins and time tracking.
+- **Friction in Recruitment Pipeline**: Poor conversions when shortlisting candidates from interview rounds into active employee records.
+- **Administrative Access Gaps**: Security concerns when general staff are able to access project financials, system designation settings, or core analytics reports.
+- **Information Query Overload**: High overhead spent by HR manually parsing dense company policies, compiling meeting transcripts, or screening uploaded candidate resumes.
+
+### How this Platform Helps
+The **Enterprise Workforce Management Platform** consolidates all operation verticals into a secure, single-pane portal:
+- **Location-Verified Attendance Check-Ins**: Integrates real-time geofenced coordinate checks (Bangalore HQ boundary tolerances) with fallback safety coordinates when browser geolocations are rejected.
+- **Unified Lifecycle Pipeline**: Promotes candidates through a recruitment board, automatically converts them to employee records with base salaries upon digital offer completion, and assigns them to departments.
+- **Automated Ledgers & Payslips**: Generates payslip ledgers and handles leave balances based on role privileges.
+- **Smart AI Operations Console**: Core AI services to parse policies, summarize uploaded meeting transcripts, and score uploaded PDF resumes against job profiles.
+- **Strict RBAC Security Guards**: Enforces Role-Based Access Control across five profiles (*SuperAdmin, OrgAdmin, HR, Manager, Employee*), hiding restricted menus from view and silently redirecting unauthorized attempts back to safe dashboards.
+
+---
+
 ## 🔑 Seeded Demo Accounts & Credentials
 
 For evaluation and testing, the database automatically seeds role-specific accounts. You can log in as any of the roles below using the shared password: **`password`**
