@@ -3,7 +3,7 @@ import { LoginResponse } from '../types';
 
 export const loginApi = async (email: string, password: string, role: string): Promise<LoginResponse> => {
   const response = await api.post<LoginResponse>(
-    '/api/auth/login',
+    '/auth/login',
     { email, password, role }
   );
   return response.data;

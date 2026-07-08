@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  baseURL: import.meta.env.VITE_API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -14,6 +14,30 @@ api.interceptors.request.use(
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // Prefix requests correctly by removing duplicate "/api" or formatting relative paths
+    if (config.url) {
+      let url = config.url;
+      if (url.startsWith('/api/')) {
+        url = url.substring(4); // Remove "/api" prefix (keep leading slash)
+      } else if (url.startsWith('api/')) {
+        url = '/' + url.substring(4); // Convert "api/..." to "/..."
+      } else if (!url.startsWith('/') && !url.startsWith('http://') && !url.startsWith('https://')) {
+        url = '/' + url;
+      }
+      config.url = url;
+    }
+
+    // Log final URL in development mode
+    if (import.meta.env.DEV) {
+      const cleanBase = (config.baseURL || '').replace(/\/$/, '');
+      const cleanUrl = config.url || '';
+      console.log(`[API Request] ${config.method?.toUpperCase()} ${cleanBase}${cleanUrl}`, {
+        data: config.data,
+        params: config.params,
+      });
+    }
+
     return config;
   },
   (error) => {
@@ -39,51 +63,80 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    if (error.response?.status === 401 && !originalRequest._retry && originalRequest.url !== '/auth/login' && originalRequest.url !== '/auth/refresh') {
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        })
-          .then((token) => {
-            originalRequest.headers.Authorization = `Bearer ${token}`;
-            return api(originalRequest);
+    
+    // 1. Handle 401 Unauthorized / Token Refresh
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      const isAuthRequest = originalRequest.url?.includes('auth/login') || originalRequest.url?.includes('auth/refresh');
+      if (!isAuthRequest) {
+        if (isRefreshing) {
+          return new Promise((resolve, reject) => {
+            failedQueue.push({ resolve, reject });
           })
-          .catch((err) => Promise.reject(err));
-      }
-
-      originalRequest._retry = true;
-      isRefreshing = true;
-
-      const refreshToken = localStorage.getItem('refreshToken');
-      if (!refreshToken) {
-        isRefreshing = false;
-        localStorage.removeItem('token');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
-        // Do not redirect inside API code if we are already logging out or on login page
-        return Promise.reject(error);
-      }
-
-      try {
-        const res = await axios.post('/api/auth/refresh', { refreshToken });
-        if (res.data.status === 'success') {
-          const { accessToken, refreshToken: newRefreshToken } = res.data.data;
-          localStorage.setItem('token', accessToken);
-          localStorage.setItem('refreshToken', newRefreshToken);
-          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-          processQueue(null, accessToken);
-          isRefreshing = false;
-          return api(originalRequest);
+            .then((token) => {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+              return api(originalRequest);
+            })
+            .catch((err) => Promise.reject(err));
         }
-      } catch (err) {
-        processQueue(err, null);
-        isRefreshing = false;
-        localStorage.removeItem('token');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
-        return Promise.reject(err);
+
+        originalRequest._retry = true;
+        isRefreshing = true;
+
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (!refreshToken) {
+          isRefreshing = false;
+          localStorage.removeItem('token');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('user');
+          if (!window.location.pathname.startsWith('/login')) {
+            window.location.href = '/login';
+          }
+          return Promise.reject(new Error('Unauthorized: Session expired.'));
+        }
+
+        try {
+          const refreshUrl = `${import.meta.env.VITE_API_URL}/auth/refresh`;
+          const res = await axios.post(refreshUrl, { refreshToken });
+          if (res.data.status === 'success') {
+            const { accessToken, refreshToken: newRefreshToken } = res.data.data;
+            localStorage.setItem('token', accessToken);
+            localStorage.setItem('refreshToken', newRefreshToken);
+            originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+            processQueue(null, accessToken);
+            isRefreshing = false;
+            return api(originalRequest);
+          }
+        } catch (err) {
+          processQueue(err, null);
+          isRefreshing = false;
+          localStorage.removeItem('token');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('user');
+          if (!window.location.pathname.startsWith('/login')) {
+            window.location.href = '/login';
+          }
+          return Promise.reject(new Error('Unauthorized: Session expired.'));
+        }
       }
     }
+
+    // 2. Handle Network errors / 404 / 5xx errors
+    if (!error.response) {
+      console.error('[API Error] Network error / Server unreachable:', error.message);
+      return Promise.reject(new Error('Network Error: Please check your connection.'));
+    }
+
+    const { status } = error.response;
+    if (status === 404) {
+      console.error('[API Error] 404 Not Found:', originalRequest.url);
+      return Promise.reject(new Error('Resource not found (404).'));
+    }
+
+    if (status >= 500) {
+      console.error(`[API Error] ${status} Server Error:`, error.response.data);
+      return Promise.reject(new Error('Backend Unavailable (500). Please try again later.'));
+    }
+
     return Promise.reject(error);
   }
 );
