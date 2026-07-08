@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import bcrypt from 'bcryptjs';
 
 export interface IEmployee extends Document {
   orgId: mongoose.Types.ObjectId;
@@ -41,6 +42,11 @@ export interface IEmployee extends Document {
   }>;
   createdAt: Date;
   updatedAt: Date;
+  resetPasswordToken?: string;
+  resetPasswordExpires?: Date;
+  loginAttempts: number;
+  lockUntil?: Date;
+  comparePassword(password: string): Promise<boolean>;
 }
 
 const EmployeeSchema: Schema = new Schema(
@@ -97,9 +103,18 @@ const EmployeeSchema: Schema = new Schema(
         date: { type: Date, default: Date.now },
       },
     ],
+    resetPasswordToken: { type: String },
+    resetPasswordExpires: { type: Date },
+    loginAttempts: { type: Number, required: true, default: 0 },
+    lockUntil: { type: Date },
   },
   { timestamps: true }
 );
+
+// Method to compare candidate password against hashed password
+EmployeeSchema.methods.comparePassword = async function (password: string): Promise<boolean> {
+  return bcrypt.compare(password, this.passwordHash);
+};
 
 // Pre-validate hook to block assigning self as own manager
 EmployeeSchema.pre('validate', function(this: any, next) {

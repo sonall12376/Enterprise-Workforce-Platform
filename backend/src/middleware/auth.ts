@@ -1,11 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
+import { env } from '../config/env';
 
 // Define custom property on Express Request type to attach authenticated user info
 export interface AuthenticatedRequest extends Request {
   user?: {
     id: string;
+    email: string;
     role: string;
-    orgId: string;
+    orgId?: string;
   };
 }
 
@@ -14,19 +17,61 @@ export const authenticate = (
   res: Response,
   next: NextFunction
 ): void => {
-  // TODO: Implement actual JWT authentication verification
   // 1. Read token from Authorization header (Bearer token)
-  // 2. Verify token signature against JWT_SECRET
-  // 3. Populate req.user details
-  
-  // Placeholder behavior: allow requests to pass or return 501/mock details depending on configuration.
-  // For the skeleton setup, we call next().
-  next();
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    res.status(401).json({
+      status: 'error',
+      statusCode: 401,
+      message: 'Unauthorized: Access token missing or invalid',
+    });
+    return;
+  }
+
+  const token = authHeader.split(' ')[1];
+
+  try {
+    // 2. Verify token signature against JWT_SECRET
+    const decoded = jwt.verify(token, env.JWT_SECRET) as {
+      id: string;
+      email: string;
+      role: string;
+      orgId?: string;
+    };
+
+    // 3. Populate req.user details
+    req.user = decoded;
+    next();
+  } catch (error) {
+    res.status(401).json({
+      status: 'error',
+      statusCode: 401,
+      message: 'Unauthorized: Invalid or expired access token',
+    });
+  }
 };
 
 export const authorize = (allowedRoles: string[]) => {
   return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
-    // TODO: Implement actual role-based authorization verification
+    if (!req.user) {
+      res.status(401).json({
+        status: 'error',
+        statusCode: 401,
+        message: 'Unauthorized: User authentication required',
+      });
+      return;
+    }
+
+    if (!allowedRoles.includes(req.user.role)) {
+      res.status(403).json({
+        status: 'error',
+        statusCode: 403,
+        message: 'Forbidden: Insufficient role permissions',
+      });
+      return;
+    }
+
     next();
   };
 };
+
