@@ -1,7 +1,12 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import AttendancePage from '../features/attendance/pages/AttendancePage';
+import LeavePage from '../features/leave/pages/LeavePage';
+import PayrollPage from '../features/payroll/pages/PayrollPage';
+import PerformancePage from '../features/performance/pages/PerformancePage';
+import NotificationPage from '../features/notification/pages/NotificationPage';
 
 import { Link } from 'react-router-dom';
-import { Layers, Laptop, BookOpen, BarChart3, Bot, Users2, Briefcase } from 'lucide-react';
+import { Layers, Laptop, BookOpen, BarChart3, Bot, Users2, Briefcase, Clock, Calendar, DollarSign, Award, Bell } from 'lucide-react';
 
 const HomePlaceholder = () => {
   return (
@@ -107,6 +112,71 @@ const HomePlaceholder = () => {
               Track candidates, schedule interview rounds, score feedback panels, and convert candidates.
             </p>
           </Link>
+
+          <Link
+            to="/attendance"
+            className="p-6 bg-slate-900/40 border border-slate-800/80 rounded-2xl hover:border-indigo-500/50 hover:bg-slate-900/60 transition-all duration-300 text-left group shadow-lg cursor-pointer"
+          >
+            <Clock className="text-indigo-400 mb-4 group-hover:scale-110 transition-transform" size={28} />
+            <h3 className="text-base font-bold text-slate-200 group-hover:text-indigo-400 transition-colors">
+              Attendance Dashboard
+            </h3>
+            <p className="text-slate-400 text-xs mt-2 leading-relaxed">
+              Clock in/out with coordinates geofencing, track active shifts, and request log corrections.
+            </p>
+          </Link>
+
+          <Link
+            to="/leaves"
+            className="p-6 bg-slate-900/40 border border-slate-800/80 rounded-2xl hover:border-amber-500/50 hover:bg-slate-900/60 transition-all duration-300 text-left group shadow-lg cursor-pointer"
+          >
+            <Calendar className="text-amber-400 mb-4 group-hover:scale-110 transition-transform" size={28} />
+            <h3 className="text-base font-bold text-slate-200 group-hover:text-amber-400 transition-colors">
+              Leave Center
+            </h3>
+            <p className="text-slate-400 text-xs mt-2 leading-relaxed">
+              Apply for vacations, monitor Casual/Sick/Earned balances, and review team approval requests.
+            </p>
+          </Link>
+
+          <Link
+            to="/payroll"
+            className="p-6 bg-slate-900/40 border border-slate-800/80 rounded-2xl hover:border-emerald-500/50 hover:bg-slate-900/60 transition-all duration-300 text-left group shadow-lg cursor-pointer"
+          >
+            <DollarSign className="text-emerald-400 mb-4 group-hover:scale-110 transition-transform" size={28} />
+            <h3 className="text-base font-bold text-slate-200 group-hover:text-emerald-400 transition-colors">
+              Payroll Hub
+            </h3>
+            <p className="text-slate-400 text-xs mt-2 leading-relaxed">
+              Verify monthly payslips history, configure employee base compensation, and process calculations.
+            </p>
+          </Link>
+
+          <Link
+            to="/performance"
+            className="p-6 bg-slate-900/40 border border-slate-800/80 rounded-2xl hover:border-violet-500/50 hover:bg-slate-900/60 transition-all duration-300 text-left group shadow-lg cursor-pointer"
+          >
+            <Award className="text-violet-400 mb-4 group-hover:scale-110 transition-transform" size={28} />
+            <h3 className="text-base font-bold text-slate-200 group-hover:text-violet-400 transition-colors">
+              Performance Hub
+            </h3>
+            <p className="text-slate-400 text-xs mt-2 leading-relaxed">
+              Track target milestone OKRs, submit appraisals evaluations, and sign-off feedback logs.
+            </p>
+          </Link>
+
+          <Link
+            to="/notifications"
+            className="p-6 bg-slate-900/40 border border-slate-800/80 rounded-2xl hover:border-pink-500/50 hover:bg-slate-900/60 transition-all duration-300 text-left group shadow-lg cursor-pointer"
+          >
+            <Bell className="text-pink-400 mb-4 group-hover:scale-110 transition-transform" size={28} />
+            <h3 className="text-base font-bold text-slate-200 group-hover:text-pink-400 transition-colors">
+              Notifications Center
+            </h3>
+            <p className="text-slate-400 text-xs mt-2 leading-relaxed">
+              View system alerts, check unread message notifications, and clear inbox logs.
+            </p>
+          </Link>
         </div>
 
         <div className="pt-8 border-t border-slate-800/80 flex flex-wrap justify-center gap-2">
@@ -142,6 +212,26 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: <HomePlaceholder />,
+  },
+  {
+    path: '/attendance',
+    element: <AttendancePage />,
+  },
+  {
+    path: '/leaves',
+    element: <LeavePage />,
+  },
+  {
+    path: '/payroll',
+    element: <PayrollPage />,
+  },
+  {
+    path: '/performance',
+    element: <PerformancePage />,
+  },
+  {
+    path: '/notifications',
+    element: <NotificationPage />,
   },
   {
     path: '/projects',

@@ -4,6 +4,16 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import notFound from './middleware/notFound';
 import errorHandler from './middleware/errorHandler';
+import attendanceRouter from './routes/attendance/attendanceRouter';
+import leaveRouter from './routes/leave/leaveRouter';
+import payrollRouter from './routes/payroll/payrollRouter';
+import performanceRouter from './routes/performance/performanceRouter';
+import notificationRouter from './routes/notification/notificationRouter';
+import projectRouter from './routes/projects/projectRoutes';
+import assetRouter from './routes/assets/assetRoutes';
+import helpDeskRouter from './routes/helpdesk/helpDeskRoutes';
+import reportRouter from './routes/reports/reportRoutes';
+import aiRouter from './routes/ai/aiRoutes';
 
 const app = express();
 
@@ -33,21 +43,16 @@ app.get('/api/health', (req, res) => {
 });
 
 // Register feature routers
-import projectRouter from './routes/projects/projectRoutes';
+app.use('/api/attendance', attendanceRouter);
+app.use('/api/leaves', leaveRouter);
+app.use('/api/payroll', payrollRouter);
+app.use('/api/performance', performanceRouter);
+app.use('/api/notifications', notificationRouter);
 app.use('/api/projects', projectRouter);
-
-import assetRouter from './routes/assets/assetRoutes';
 app.use('/api/assets', assetRouter);
-
-import helpDeskRouter from './routes/helpdesk/helpDeskRoutes';
 app.use('/api/helpdesk', helpDeskRouter);
-
-import reportRouter from './routes/reports/reportRoutes';
 app.use('/api/reports', reportRouter);
-
-import aiRouter from './routes/ai/aiRoutes';
 app.use('/api/ai', aiRouter);
-
 
 // Fallback Middlewares
 app.use(notFound);
