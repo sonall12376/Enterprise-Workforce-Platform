@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -154,7 +154,7 @@ export function LoginPage() {
               )}
             </div>
 
-            {/* Remember Me */}
+            {/* Remember Me & Forgot Password */}
             <div className="flex items-center justify-between pt-1">
               <label className="flex items-center gap-2 cursor-pointer group select-none">
                 <input
@@ -167,6 +167,12 @@ export function LoginPage() {
                   Remember this device
                 </span>
               </label>
+              <Link
+                to="/forgot-password"
+                className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold transition-colors"
+              >
+                Forgot password?
+              </Link>
             </div>
 
             {/* Submit Button */}

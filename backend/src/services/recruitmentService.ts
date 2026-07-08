@@ -276,7 +276,7 @@ export const recruitmentService = {
         relationship: 'Other',
         phone: '9999988888',
       },
-      passwordHash: '$2a$10$7zBvB02w.5.8L3Y6L3uJ2.r8E/uNqA64q1k8.tGj8.7j9.8j9.8j9', // default
+      passwordHash: '$2a$10$oiQc3aHxbrksxPndNSWbHOv.Ijfq3PezD/x8J/ZUkj.GSNPghrHae', // default
       role: 'Employee',
       timeline: [
         {
