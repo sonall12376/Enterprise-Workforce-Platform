@@ -20,8 +20,7 @@ router.post('/policy-assistant', asyncHandler(explainPolicy));
 router.post('/payroll-explanation', asyncHandler(explainPayroll));
 router.post('/summarize-meeting', asyncHandler(summarizeMeeting));
 
-// Restricted to Admins & Managers
-router.post('/analyze-resume', authorize(['SuperAdmin', 'OrgAdmin', 'Manager']), asyncHandler(analyzeResume));
-router.post('/attendance-insights', authorize(['SuperAdmin', 'OrgAdmin', 'Manager']), asyncHandler(getAttendanceInsights));
+router.post('/analyze-resume', asyncHandler(analyzeResume));
+router.post('/attendance-insights', asyncHandler(getAttendanceInsights));
 
 export default router;

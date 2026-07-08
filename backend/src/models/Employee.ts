@@ -19,7 +19,7 @@ export interface IEmployee extends Document {
   reportingManagerId?: mongoose.Types.ObjectId;
   employmentType: 'Full-time' | 'Part-time' | 'Contract' | 'Intern';
   status: 'Active' | 'Onboarding' | 'Suspended' | 'Terminated';
-  role: 'SuperAdmin' | 'OrgAdmin' | 'Manager' | 'Employee';
+  role: 'SuperAdmin' | 'OrgAdmin' | 'HR' | 'Manager' | 'Employee';
   passwordHash: string;
   profilePicture?: string;
   address?: {
@@ -78,7 +78,7 @@ const EmployeeSchema: Schema = new Schema(
     },
     role: {
       type: String,
-      enum: ['SuperAdmin', 'OrgAdmin', 'Manager', 'Employee'],
+      enum: ['SuperAdmin', 'OrgAdmin', 'HR', 'Manager', 'Employee'],
       default: 'Employee',
     },
     passwordHash: { type: String, required: true },

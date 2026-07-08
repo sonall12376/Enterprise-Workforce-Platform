@@ -9,6 +9,7 @@ import {
   forgotPasswordSchema,
   resetPasswordSchema,
   changePasswordSchema,
+  signupSchema,
 } from '../../validators/authValidator';
 import { AuthenticatedRequest } from '../../middleware/auth';
 
@@ -31,7 +32,7 @@ export const login = async (
       return;
     }
 
-    const { email, password } = validation.data;
+    const { email, password, role } = validation.data;
 
     // 2. Find employee
     const employee = await Employee.findOne({ email: email.toLowerCase() });
@@ -40,6 +41,16 @@ export const login = async (
         status: 'error',
         statusCode: 401,
         message: 'Invalid credentials',
+      });
+      return;
+    }
+
+    // Role Verification Check
+    if (employee.role !== role) {
+      res.status(401).json({
+        status: 'error',
+        statusCode: 401,
+        message: 'Role mismatch: Selected role does not match your registered user profile role.',
       });
       return;
     }
@@ -236,11 +247,11 @@ export const forgotPassword = async (
     const { email } = validation.data;
     const employee = await Employee.findOne({ email: email.toLowerCase() });
     
-    // For security reasons, we do not reveal if the email doesn't exist
     if (!employee) {
-      res.status(200).json({
-        status: 'success',
-        message: 'If the email exists, a password reset link has been dispatched.',
+      res.status(404).json({
+        status: 'error',
+        statusCode: 404,
+        message: 'Account not found. Please verify your email address.',
       });
       return;
     }
@@ -363,4 +374,81 @@ export const changePassword = async (
   }
 };
 
-export default { login, refresh, forgotPassword, resetPassword, changePassword };
+export const signup = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const validation = signupSchema.safeParse(req.body);
+    if (!validation.success) {
+      res.status(400).json({
+        status: 'error',
+        statusCode: 400,
+        message: 'Validation failure',
+        errors: validation.error.flatten().fieldErrors,
+      });
+      return;
+    }
+
+    const { firstName, lastName, email, phone, gender, dob, role, password, emergencyContact } = validation.data;
+
+    const existing = await Employee.findOne({ email: email.toLowerCase() });
+    if (existing) {
+      res.status(400).json({
+        status: 'error',
+        statusCode: 400,
+        message: 'Duplicate email: User already registered with this email address.',
+      });
+      return;
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+    const employeeId = 'EMP-' + Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Default seeded orgId
+    const orgId = '603d2e1b12cf000000000001';
+
+    const newEmployee = await Employee.create({
+      orgId,
+      employeeId,
+      name: `${firstName} ${lastName}`,
+      firstName,
+      lastName,
+      email: email.toLowerCase(),
+      phone,
+      gender,
+      dob,
+      role,
+      passwordHash,
+      emergencyContact,
+      status: 'Active',
+      timeline: [
+        {
+          action: 'Self Registered',
+          description: 'User created their own account via Signup page.',
+          performedBy: `${firstName} ${lastName}`,
+          date: new Date(),
+        },
+      ],
+    });
+
+    res.status(201).json({
+      status: 'success',
+      message: 'Signup successful! You can now log in.',
+      data: {
+        user: {
+          id: newEmployee._id,
+          email: newEmployee.email,
+          name: newEmployee.name,
+          role: newEmployee.role,
+          orgId: newEmployee.orgId,
+        },
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export default { login, refresh, forgotPassword, resetPassword, changePassword, signup };

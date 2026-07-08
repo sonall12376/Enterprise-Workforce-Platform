@@ -16,8 +16,8 @@ const router = Router();
 // Enforce auth on all report routes
 router.use(authenticate);
 
-// Restricted to Admin & Managers
-router.use(authorize(['SuperAdmin', 'OrgAdmin', 'Manager']));
+// Restricted to Admin, HR & Managers
+router.use(authorize(['SuperAdmin', 'OrgAdmin', 'HR', 'Manager']));
 
 router.get('/projects', asyncHandler(getProjectStats));
 router.get('/tasks', asyncHandler(getTaskStats));

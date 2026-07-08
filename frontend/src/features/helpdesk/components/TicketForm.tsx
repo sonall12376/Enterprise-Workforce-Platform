@@ -35,8 +35,8 @@ export const TicketForm: React.FC<TicketFormProps> = ({ ticket, isOpen, onClose,
   } = useForm<TicketFormData>({
     resolver: zodResolver(ticketFormSchema),
     defaultValues: {
-      subject: '',
-      description: '',
+      subject: 'VPN network route failure in Bangalore Office',
+      description: 'The secure VPN gateway keeps throwing timeout exceptions during connection handshakes. Need to review the routes.',
       category: 'IT',
       priority: 'Medium',
     },
@@ -52,8 +52,8 @@ export const TicketForm: React.FC<TicketFormProps> = ({ ticket, isOpen, onClose,
       });
     } else {
       reset({
-        subject: '',
-        description: '',
+        subject: 'VPN network route failure in Bangalore Office',
+        description: 'The secure VPN gateway keeps throwing timeout exceptions during connection handshakes. Need to review the routes.',
         category: 'IT',
         priority: 'Medium',
       });

@@ -4,6 +4,22 @@ An enterprise-grade Workforce Management Platform built with React, Vite, Node.j
 
 ---
 
+## 🔑 Seeded Demo Accounts & Credentials
+
+For evaluation and testing, the database automatically seeds role-specific accounts. You can log in as any of the roles below using the shared password: **`password`**
+
+| Role Title | Access Selector Option | Seeded Work Email | Password |
+| :--- | :--- | :--- | :--- |
+| **Super Admin** | Super Admin (Platform Operator) | `superadmin@workforce.com` | `password` |
+| **Organization Admin** | Organization Admin (Tenant Operations) | `admin@workforce.com` | `password` |
+| **HR Manager** | HR Manager (Employee Lifecycle) | `hr@workforce.com` | `password` |
+| **Project Manager** | Manager (Team Approval & Sprints) | `manager@workforce.com` | `password` |
+| **Standard Employee** | Employee (Staff Self-Service) | `employee@workforce.com` | `password` |
+
+Each user profile is fully seeded with active payroll ledgers, leave requests, allocated hardware assets, goals, appraisals, and notifications history.
+
+---
+
 ## Technology Stack
 
 ### Frontend

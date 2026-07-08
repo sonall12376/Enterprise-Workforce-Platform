@@ -5,10 +5,14 @@ import {
   forgotPassword,
   resetPassword,
   changePassword,
+  signup,
 } from '../../controllers/auth/authController';
 import { authenticate } from '../../middleware/auth';
 
 const router = Router();
+
+// Endpoint: POST /api/auth/signup
+router.post('/signup', signup);
 
 // Endpoint: POST /api/auth/login
 router.post('/login', login);

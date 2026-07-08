@@ -33,12 +33,23 @@ const seedDefaultUser = async (): Promise<void> => {
       console.log('🌱 Seeding default user...');
       const passwordHash = await bcrypt.hash('SecurePassword123', 10);
       await Employee.create({
+        orgId: '603d2e1b12cf000000000001',
         employeeId: 'EMP-10243',
         email: 'employee@organization.com',
         passwordHash,
-        role: 'OrgAdmin',
+        role: 'Employee',
         status: 'Active',
         name: 'Jane Doe',
+        firstName: 'Jane',
+        lastName: 'Doe',
+        gender: 'Female',
+        dob: new Date('1995-02-15'),
+        phone: '+919876543211',
+        emergencyContact: {
+          name: 'John Doe',
+          relationship: 'Spouse',
+          phone: '+919876543211',
+        }
       });
       console.log('✅ Default test user seeded successfully!');
     } else {

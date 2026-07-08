@@ -76,16 +76,25 @@ export const ClockWidget: React.FC<ClockWidgetProps> = ({ onStatusChange, curren
 
     try {
       let coords: Coordinates | undefined;
+      let fallbackUsed = false;
       try {
         coords = await getCoordinates();
       } catch (locErr) {
-        setError((locErr as Error).message);
-        setLoading(false);
-        return;
+        console.warn('Geolocation failed, falling back to corporate headquarters coordinates:', locErr);
+        // Default office coordinates (Bangalore HQ)
+        coords = {
+          latitude: 12.9716,
+          longitude: 77.5946,
+        };
+        fallbackUsed = true;
       }
 
       await clockIn(coords);
-      setSuccess('Clocked in successfully!');
+      if (fallbackUsed) {
+        setSuccess('Clocked in successfully (fallback to default workspace coordinates)!');
+      } else {
+        setSuccess('Clocked in successfully!');
+      }
       onStatusChange();
     } catch (err: any) {
       const errMsg = err.response?.data?.message || 'Failed to clock in.';

@@ -14,6 +14,7 @@ import assetRouter from './routes/assets/assetRoutes';
 import helpDeskRouter from './routes/helpdesk/helpDeskRoutes';
 import reportRouter from './routes/reports/reportRoutes';
 import aiRouter from './routes/ai/aiRoutes';
+import recruitmentRouter from './routes/recruitment/recruitmentRoutes';
 
 import authRoutes from './routes/auth/authRoutes';
 import employeeRouter from './routes/employee/employeeRoutes';
@@ -69,6 +70,7 @@ app.use('/api/assets', assetRouter);
 app.use('/api/helpdesk', helpDeskRouter);
 app.use('/api/reports', reportRouter);
 app.use('/api/ai', aiRouter);
+app.use('/api/recruitment', recruitmentRouter);
 
 // Fallback Middlewares
 app.use(notFound);

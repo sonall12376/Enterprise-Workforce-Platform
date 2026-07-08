@@ -1,8 +1,13 @@
 import api from '../../../services/api';
 import { LoginResponse } from '../types';
 
-export const loginApi = async (email: string, password: string): Promise<LoginResponse> => {
-  const response = await api.post<LoginResponse>('/auth/login', { email, password });
+export const loginApi = async (email: string, password: string, role: string): Promise<LoginResponse> => {
+  const response = await api.post<LoginResponse>('/auth/login', { email, password, role });
+  return response.data;
+};
+
+export const signupApi = async (data: any) => {
+  const response = await api.post('/auth/signup', data);
   return response.data;
 };
 

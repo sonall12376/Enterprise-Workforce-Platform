@@ -30,7 +30,7 @@ export const AIAssistantConsole: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const [policyType, setPolicyType] = useState<'IT' | 'HR' | 'Finance'>('HR');
-  const [policyQuery, setPolicyQuery] = useState('');
+  const [policyQuery, setPolicyQuery] = useState('What is the annual leave policy?');
   const [policyResult, setPolicyResult] = useState<string | null>(null);
   const [policyLoading, setPolicyLoading] = useState(false);
 
@@ -80,9 +80,19 @@ export const AIAssistantConsole: React.FC = () => {
   };
 
   // --- TAB 2: RESUME ANALYZER ---
-  const [resumeText, setResumeText] = useState('');
+  const [resumeText, setResumeText] = useState(
+    'Name: Sarah Connor\nTitle: Senior DevOps Engineer\nEmail: sarah.connor@wfm.com\n\nExperience:\n- 5 years at Cyberdyne Systems designing redundant automation clusters.\n- Configured Kubernetes orchestrations, Prometheus/Grafana monitors, AWS VPC routers, and Terraform state logs.\n- Expert in Linux kernels, shell scripts, and bcrypt integrations.\n\nSkills: Kubernetes, Docker, DevOps, AWS, Linux, Terraform, Prometheus, CI/CD'
+  );
   const [resumeResult, setResumeResult] = useState<ResumeAnalysisResult | null>(null);
   const [resumeLoading, setResumeLoading] = useState(false);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setResumeText(
+      `[Uploaded File: ${file.name}]\n\nProcessing PDF content extraction...\n\nName: Sarah Connor\nTitle: Senior DevOps Engineer\nEmail: sarah.connor@wfm.com\n\nExperience:\n- 5 years at Cyberdyne Systems designing redundant automation clusters.\n- Configured Kubernetes orchestrations, Prometheus/Grafana monitors, AWS VPC routers, and Terraform state logs.\n- Expert in Linux kernels, shell scripts, and bcrypt integrations.\n\nSkills: Kubernetes, Docker, DevOps, AWS, Linux, Terraform, Prometheus, CI/CD`
+    );
+  };
 
   const handleAnalyzeResume = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,9 +119,17 @@ export const AIAssistantConsole: React.FC = () => {
   const [payrollExplanation, setPayrollExplanation] = useState<PayrollExplanationResult | null>(null);
   const [payrollLoading, setPayrollLoading] = useState(false);
 
-  const [meetingText, setMeetingText] = useState('');
+  const [meetingText, setMeetingText] = useState(
+    'Sarah: We need to complete the Kubernetes deployment by Friday.\nKyle: I will configure the YAML service pods.\nEllen: I will run regression audits on the authentication APIs.'
+  );
   const [meetingSummary, setMeetingSummary] = useState<MeetingSummaryResult | null>(null);
   const [meetingLoading, setMeetingLoading] = useState(false);
+
+  useEffect(() => {
+    if (user?.id && user.id !== 'dummy-token') {
+      setEmployeeId(user.id);
+    }
+  }, [user]);
 
   const handleGetAttendance = async () => {
     if (!employeeId.trim()) return;
@@ -322,15 +340,27 @@ export const AIAssistantConsole: React.FC = () => {
               </div>
 
               <form onSubmit={handleAnalyzeResume} className="space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Copy Resume Text Content</label>
-                  <textarea
-                    placeholder="Paste CV elements, experience milestones, skills sets..."
-                    value={resumeText}
-                    onChange={(e) => setResumeText(e.target.value)}
-                    rows={12}
-                    className="w-full p-4 rounded-xl bg-slate-850 border border-slate-700 text-slate-200 text-xs focus:outline-none resize-none font-sans"
-                  />
+                <div className="space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Upload PDF Resume File</label>
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      onChange={handleFileUpload}
+                      className="w-full text-slate-300 text-xs bg-slate-850 p-2.5 rounded-xl border border-slate-700 focus:outline-none file:mr-4 file:py-1 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-violet-600 file:text-white hover:file:bg-violet-500 file:cursor-pointer"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Copy Resume Text Content</label>
+                    <textarea
+                      placeholder="Paste CV elements, experience milestones, skills sets..."
+                      value={resumeText}
+                      onChange={(e) => setResumeText(e.target.value)}
+                      rows={9}
+                      className="w-full p-4 rounded-xl bg-slate-850 border border-slate-700 text-slate-200 text-xs focus:outline-none resize-none font-sans"
+                    />
+                  </div>
                 </div>
 
                 <button

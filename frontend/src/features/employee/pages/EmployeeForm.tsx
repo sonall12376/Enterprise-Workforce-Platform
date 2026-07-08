@@ -15,12 +15,12 @@ export const EmployeeForm: React.FC = () => {
 
   // Form Fields State
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
+    firstName: 'John',
+    lastName: 'Doe',
+    email: 'john.doe@workforce.com',
+    phone: '9876543212',
     gender: 'Male' as 'Male' | 'Female' | 'Other',
-    dob: '',
+    dob: '1990-05-15',
     joiningDate: new Date().toISOString().split('T')[0],
     deptId: '',
     designationId: '',
@@ -30,18 +30,18 @@ export const EmployeeForm: React.FC = () => {
     employmentType: 'Full-time' as 'Full-time' | 'Part-time' | 'Contract' | 'Intern',
     status: 'Active' as 'Active' | 'Onboarding' | 'Suspended' | 'Terminated',
     role: 'Employee' as 'SuperAdmin' | 'OrgAdmin' | 'Manager' | 'Employee',
-    password: '',
+    password: 'password',
     address: {
-      street: '',
-      city: '',
-      state: '',
-      zipCode: '',
+      street: '123 Workspace Blvd',
+      city: 'Bangalore',
+      state: 'Karnataka',
+      zipCode: '560001',
       country: 'India',
     },
     emergencyContact: {
-      name: '',
-      relationship: '',
-      phone: '',
+      name: 'Sarah Connor',
+      relationship: 'Spouse',
+      phone: '9876543210',
     },
   });
 

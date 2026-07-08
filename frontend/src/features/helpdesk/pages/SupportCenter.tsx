@@ -39,15 +39,6 @@ export const SupportCenter: React.FC = () => {
     }
   }, [user, login]);
 
-  const handleRoleChange = (role: string) => {
-    login('dummy-token', {
-      id: '603d2e1b12cf000000000005',
-      name: 'Sarah Connor',
-      email: 'sarah.connor@wfm.com',
-      role: role,
-      orgId: '603d2e1b12cf000000000001',
-    });
-  };
 
   const handleCreateOpen = () => {
     setSelectedTicket(null);
@@ -178,28 +169,7 @@ export const SupportCenter: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#0b0f19] text-slate-100 font-sans p-6 md:p-10">
-      {/* Dev Sandbox Role Switcher */}
-      <div className="mb-8 p-4 bg-slate-900/50 border border-slate-800/80 rounded-2xl flex flex-wrap items-center justify-between gap-4 backdrop-blur-md">
-        <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-violet-500 animate-pulse" />
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-400">🔧 Dev Sandbox: Role Switcher</span>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {['SuperAdmin', 'OrgAdmin', 'Manager', 'Employee'].map((role) => (
-            <button
-              key={role}
-              onClick={() => handleRoleChange(role)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all duration-200 cursor-pointer ${
-                currentRole === role
-                  ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white border-transparent shadow-lg shadow-violet-950/40'
-                  : 'bg-slate-800/60 text-slate-400 border-slate-700/60 hover:text-slate-200'
-              }`}
-            >
-              {role}
-            </button>
-          ))}
-        </div>
-      </div>
+
 
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">

@@ -39,28 +39,28 @@ export const DashboardLayout: React.FC = () => {
   };
 
   const currentRole = user?.role || 'Employee';
-  const isAdmin = ['SuperAdmin', 'OrgAdmin'].includes(currentRole);
+  const hasAdminSettings = ['SuperAdmin', 'OrgAdmin', 'HR'].includes(currentRole);
 
   const links = [
-    { to: '/', label: 'Home Dashboard', icon: LayoutDashboard, roles: ['SuperAdmin', 'OrgAdmin', 'Manager', 'Employee'] },
-    { to: '/employees/directory', label: 'Employee Directory', icon: Users, roles: ['SuperAdmin', 'OrgAdmin', 'Manager', 'Employee'] },
-    { to: '/recruitment', label: 'Recruitment Board', icon: Briefcase, roles: ['SuperAdmin', 'OrgAdmin', 'Manager', 'Employee'] },
+    { to: '/', label: 'Home Dashboard', icon: LayoutDashboard, roles: ['SuperAdmin', 'OrgAdmin', 'HR', 'Manager', 'Employee'] },
+    { to: '/employees/directory', label: 'Employee Directory', icon: Users, roles: ['SuperAdmin', 'OrgAdmin', 'HR'] },
+    { to: '/recruitment', label: 'Recruitment Board', icon: Briefcase, roles: ['SuperAdmin', 'OrgAdmin', 'HR', 'Manager'] },
     { to: '/projects', label: 'Project Dashboard', icon: Layers, roles: ['SuperAdmin', 'OrgAdmin', 'Manager', 'Employee'] },
-    { to: '/assets', label: 'Asset Registry', icon: Laptop, roles: ['SuperAdmin', 'OrgAdmin', 'Manager', 'Employee'] },
+    { to: '/assets', label: 'Asset Registry', icon: Laptop, roles: ['SuperAdmin', 'OrgAdmin'] },
     { to: '/helpdesk', label: 'Support Center', icon: HelpCircle, roles: ['SuperAdmin', 'OrgAdmin', 'Manager', 'Employee'] },
-    { to: '/reports', label: 'Analytics Console', icon: BarChart3, roles: ['SuperAdmin', 'OrgAdmin', 'Manager', 'Employee'] },
-    { to: '/ai-assistant', label: 'AI Operations', icon: Bot, roles: ['SuperAdmin', 'OrgAdmin', 'Manager', 'Employee'] },
-    { to: '/attendance', label: 'Attendance Hub', icon: Clock, roles: ['SuperAdmin', 'OrgAdmin', 'Manager', 'Employee'] },
-    { to: '/leaves', label: 'Leave Center', icon: Calendar, roles: ['SuperAdmin', 'OrgAdmin', 'Manager', 'Employee'] },
-    { to: '/payroll', label: 'Payroll Hub', icon: DollarSign, roles: ['SuperAdmin', 'OrgAdmin', 'Manager', 'Employee'] },
-    { to: '/performance', label: 'Performance Hub', icon: Award, roles: ['SuperAdmin', 'OrgAdmin', 'Manager', 'Employee'] },
-    { to: '/notifications', label: 'Notifications', icon: Bell, roles: ['SuperAdmin', 'OrgAdmin', 'Manager', 'Employee'] },
+    { to: '/reports', label: 'Analytics Console', icon: BarChart3, roles: ['SuperAdmin', 'OrgAdmin', 'HR', 'Manager'] },
+    { to: '/ai-assistant', label: 'AI Operations', icon: Bot, roles: ['SuperAdmin', 'OrgAdmin', 'HR', 'Manager', 'Employee'] },
+    { to: '/attendance', label: 'Attendance Hub', icon: Clock, roles: ['SuperAdmin', 'HR', 'Employee'] },
+    { to: '/leaves', label: 'Leave Center', icon: Calendar, roles: ['SuperAdmin', 'HR', 'Manager', 'Employee'] },
+    { to: '/payroll', label: 'Payroll Hub', icon: DollarSign, roles: ['SuperAdmin', 'HR', 'Employee'] },
+    { to: '/performance', label: 'Performance Hub', icon: Award, roles: ['SuperAdmin', 'Manager', 'Employee'] },
+    { to: '/notifications', label: 'Notifications', icon: Bell, roles: ['SuperAdmin', 'OrgAdmin', 'HR', 'Manager', 'Employee'] },
   ];
 
   const adminLinks = [
-    { to: '/organization/settings', label: 'Org Settings', icon: Settings },
-    { to: '/organization/departments', label: 'Departments', icon: Shield },
-    { to: '/organization/designations', label: 'Designations', icon: Key },
+    { to: '/organization/settings', label: 'Org Settings', icon: Settings, roles: ['SuperAdmin', 'OrgAdmin', 'HR'] },
+    { to: '/organization/departments', label: 'Departments', icon: Shield, roles: ['SuperAdmin', 'OrgAdmin', 'HR'] },
+    { to: '/organization/designations', label: 'Designations', icon: Key, roles: ['SuperAdmin', 'OrgAdmin'] },
   ];
 
   const getPageTitle = () => {
@@ -133,30 +133,32 @@ export const DashboardLayout: React.FC = () => {
               );
             })}
 
-          {isAdmin && (
+          {hasAdminSettings && (
             <>
               <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 pt-6 mb-2">
                 Administration
               </div>
-              {adminLinks.map((link) => {
-                const Icon = link.icon;
-                const isActive = location.pathname === link.to;
-                return (
-                  <Link
-                    key={link.to}
-                    to={link.to}
-                    onClick={() => setSidebarOpen(false)}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
-                      isActive
-                        ? 'bg-gradient-to-r from-indigo-500/10 to-violet-500/10 border-l-2 border-indigo-500 text-indigo-400 font-bold'
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/40'
-                    }`}
-                  >
-                    <Icon size={18} />
-                    <span>{link.label}</span>
-                  </Link>
-                );
-              })}
+              {adminLinks
+                .filter((link) => link.roles.includes(currentRole))
+                .map((link) => {
+                  const Icon = link.icon;
+                  const isActive = location.pathname === link.to;
+                  return (
+                    <Link
+                      key={link.to}
+                      to={link.to}
+                      onClick={() => setSidebarOpen(false)}
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                        isActive
+                          ? 'bg-gradient-to-r from-indigo-500/10 to-violet-500/10 border-l-2 border-indigo-500 text-indigo-400 font-bold'
+                          : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/40'
+                      }`}
+                    >
+                      <Icon size={18} />
+                      <span>{link.label}</span>
+                    </Link>
+                  );
+                })}
             </>
           )}
         </nav>

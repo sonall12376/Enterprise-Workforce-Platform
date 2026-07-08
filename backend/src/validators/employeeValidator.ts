@@ -29,7 +29,7 @@ export const createEmployeeSchema = z.object({
     relationship: z.string().min(1, 'Relationship is required').trim(),
     phone: z.string().min(5, 'Emergency contact phone is required').trim(),
   }),
-  role: z.enum(['SuperAdmin', 'OrgAdmin', 'Manager', 'Employee']).optional(),
+  role: z.enum(['SuperAdmin', 'OrgAdmin', 'HR', 'Manager', 'Employee']).optional(),
   password: z.string().min(8, 'Password must be at least 8 characters').optional(),
 });
 
@@ -60,6 +60,6 @@ export const updateEmployeeSchema = z.object({
     relationship: z.string().min(1, 'Relationship is required').trim().optional(),
     phone: z.string().min(5, 'Emergency contact phone is required').trim().optional(),
   }).optional(),
-  role: z.enum(['SuperAdmin', 'OrgAdmin', 'Manager', 'Employee']).optional(),
+  role: z.enum(['SuperAdmin', 'OrgAdmin', 'HR', 'Manager', 'Employee']).optional(),
   profilePicture: z.string().optional(),
 });
