@@ -28,15 +28,11 @@ api.interceptors.request.use(
       config.url = url;
     }
 
-    // Log final URL in development mode
-    if (import.meta.env.DEV) {
-      const cleanBase = (config.baseURL || '').replace(/\/$/, '');
-      const cleanUrl = config.url || '';
-      console.log(`[API Request] ${config.method?.toUpperCase()} ${cleanBase}${cleanUrl}`, {
-        data: config.data,
-        params: config.params,
-      });
-    }
+    // Log final URL
+    console.log(
+      'API Request:',
+      `${api.defaults.baseURL}${config.url}`
+    );
 
     return config;
   },
