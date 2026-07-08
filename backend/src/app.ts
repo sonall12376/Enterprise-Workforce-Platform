@@ -16,6 +16,13 @@ import reportRouter from './routes/reports/reportRoutes';
 import aiRouter from './routes/ai/aiRoutes';
 
 import authRoutes from './routes/auth/authRoutes';
+import employeeRouter from './routes/employee/employeeRoutes';
+import organizationRouter from './routes/organization/organizationRoutes';
+import departmentRouter from './routes/department/departmentRoutes';
+import designationRouter from './routes/designation/designationRoutes';
+import officeLocationRouter from './routes/officeLocation/officeLocationRoutes';
+import workShiftRouter from './routes/workShift/workShiftRoutes';
+import holidayRouter from './routes/holiday/holidayRoutes';
 
 const app = express();
 
@@ -45,6 +52,13 @@ app.get('/api/health', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/api/employees', employeeRouter);
+app.use('/api/organizations', organizationRouter);
+app.use('/api/departments', departmentRouter);
+app.use('/api/designations', designationRouter);
+app.use('/api/office-locations', officeLocationRouter);
+app.use('/api/work-shifts', workShiftRouter);
+app.use('/api/holidays', holidayRouter);
 app.use('/api/attendance', attendanceRouter);
 app.use('/api/leaves', leaveRouter);
 app.use('/api/payroll', payrollRouter);

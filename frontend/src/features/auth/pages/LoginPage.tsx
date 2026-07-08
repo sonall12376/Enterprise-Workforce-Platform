@@ -54,7 +54,7 @@ export function LoginPage() {
       const response = await loginApi(values.email, values.password);
       if (response.status === 'success' && response.data) {
         // Save auth data using Context Provider
-        login(response.data.accessToken, response.data.user);
+        login(response.data.accessToken, response.data.user, response.data.refreshToken);
         navigate('/');
       } else {
         setApiError(response.message || 'Login failed. Please try again.');

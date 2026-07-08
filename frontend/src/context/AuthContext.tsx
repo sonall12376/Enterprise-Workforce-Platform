@@ -12,7 +12,7 @@ export interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (token: string, userData: User) => void;
+  login: (token: string, userData: User, refreshToken?: string) => void;
   logout: () => void;
 }
 
@@ -32,19 +32,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       } catch {
         localStorage.removeItem('user');
         localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
       }
     }
     setIsLoading(false);
   }, []);
 
-  const login = (token: string, userData: User) => {
+  const login = (token: string, userData: User, refreshToken?: string) => {
     localStorage.setItem('token', token);
+    if (refreshToken) {
+      localStorage.setItem('refreshToken', refreshToken);
+    }
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
   };
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
     setUser(null);
   };

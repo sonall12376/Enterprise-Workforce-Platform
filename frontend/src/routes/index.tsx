@@ -246,98 +246,158 @@ import CandidateList from '../features/recruitment/pages/CandidateList';
 import CandidateDetails from '../features/recruitment/pages/CandidateDetails';
 import InterviewManagement from '../features/recruitment/pages/InterviewManagement';
 
+// New Pages & Layouts
+import DashboardLayout from '../components/layout/DashboardLayout';
+import ProtectedRoute from '../components/layout/ProtectedRoute';
+import ForgotPasswordPage from '../features/auth/pages/ForgotPasswordPage';
+import ResetPasswordPage from '../features/auth/pages/ResetPasswordPage';
+import ChangePasswordPage from '../features/auth/pages/ChangePasswordPage';
+import UserProfilePage from '../features/employee/pages/UserProfilePage';
+import OrganizationSettingsPage from '../features/organization/pages/OrganizationSettingsPage';
+import DepartmentManagementPage from '../features/organization/pages/DepartmentManagementPage';
+import DesignationManagementPage from '../features/organization/pages/DesignationManagementPage';
+
 export const router = createBrowserRouter([
-  {
-    path: '/',
-    element: <HomePlaceholder />,
-  },
   {
     path: '/login',
     element: <LoginPage />,
   },
   {
-    path: '/attendance',
-    element: <AttendancePage />,
+    path: '/forgot-password',
+    element: <ForgotPasswordPage />,
   },
   {
-    path: '/leaves',
-    element: <LeavePage />,
+    path: '/reset-password/:token',
+    element: <ResetPasswordPage />,
   },
   {
-    path: '/payroll',
-    element: <PayrollPage />,
-  },
-  {
-    path: '/performance',
-    element: <PerformancePage />,
-  },
-  {
-    path: '/notifications',
-    element: <NotificationPage />,
-  },
-  {
-    path: '/projects',
-    element: <ProjectDashboard />,
-  },
-  {
-    path: '/projects/:projectId/tasks',
-    element: <TaskDashboard />,
-  },
-  {
-    path: '/assets',
-    element: <AssetDashboard />,
-  },
-  {
-    path: '/helpdesk',
-    element: <SupportCenter />,
-  },
-  {
-    path: '/helpdesk/tickets/:id',
-    element: <TicketDetail />,
-  },
-  {
-    path: '/reports',
-    element: <AnalyticsConsole />,
-  },
-  {
-    path: '/ai-assistant',
-    element: <AIAssistantConsole />,
-  },
-  {
-    path: '/employees',
-    element: <EmployeeDashboard />,
-  },
-  {
-    path: '/employees/directory',
-    element: <EmployeeList />,
-  },
-  {
-    path: '/employees/new',
-    element: <EmployeeForm />,
-  },
-  {
-    path: '/employees/edit/:id',
-    element: <EmployeeForm />,
-  },
-  {
-    path: '/employees/:id',
-    element: <EmployeeDetails />,
-  },
-  {
-    path: '/recruitment',
-    element: <CandidateDashboard />,
-  },
-  {
-    path: '/candidates',
-    element: <CandidateList />,
-  },
-  {
-    path: '/candidates/:id',
-    element: <CandidateDetails />,
-  },
-  {
-    path: '/interviews',
-    element: <InterviewManagement />,
+    element: (
+      <ProtectedRoute>
+        <DashboardLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        path: '/',
+        element: <HomePlaceholder />,
+      },
+      {
+        path: '/profile',
+        element: <UserProfilePage />,
+      },
+      {
+        path: '/change-password',
+        element: <ChangePasswordPage />,
+      },
+      {
+        path: '/attendance',
+        element: <AttendancePage />,
+      },
+      {
+        path: '/leaves',
+        element: <LeavePage />,
+      },
+      {
+        path: '/payroll',
+        element: <PayrollPage />,
+      },
+      {
+        path: '/performance',
+        element: <PerformancePage />,
+      },
+      {
+        path: '/notifications',
+        element: <NotificationPage />,
+      },
+      {
+        path: '/projects',
+        element: <ProjectDashboard />,
+      },
+      {
+        path: '/projects/:projectId/tasks',
+        element: <TaskDashboard />,
+      },
+      {
+        path: '/assets',
+        element: <AssetDashboard />,
+      },
+      {
+        path: '/helpdesk',
+        element: <SupportCenter />,
+      },
+      {
+        path: '/helpdesk/tickets/:id',
+        element: <TicketDetail />,
+      },
+      {
+        path: '/reports',
+        element: <AnalyticsConsole />,
+      },
+      {
+        path: '/ai-assistant',
+        element: <AIAssistantConsole />,
+      },
+      {
+        path: '/employees',
+        element: <EmployeeDashboard />,
+      },
+      {
+        path: '/employees/directory',
+        element: <EmployeeList />,
+      },
+      {
+        path: '/employees/new',
+        element: <EmployeeForm />,
+      },
+      {
+        path: '/employees/edit/:id',
+        element: <EmployeeForm />,
+      },
+      {
+        path: '/employees/:id',
+        element: <EmployeeDetails />,
+      },
+      {
+        path: '/recruitment',
+        element: <CandidateDashboard />,
+      },
+      {
+        path: '/candidates',
+        element: <CandidateList />,
+      },
+      {
+        path: '/candidates/:id',
+        element: <CandidateDetails />,
+      },
+      {
+        path: '/interviews',
+        element: <InterviewManagement />,
+      },
+      {
+        path: '/organization/settings',
+        element: (
+          <ProtectedRoute allowedRoles={['SuperAdmin', 'OrgAdmin']}>
+            <OrganizationSettingsPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/organization/departments',
+        element: (
+          <ProtectedRoute allowedRoles={['SuperAdmin', 'OrgAdmin']}>
+            <DepartmentManagementPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/organization/designations',
+        element: (
+          <ProtectedRoute allowedRoles={['SuperAdmin', 'OrgAdmin']}>
+            <DesignationManagementPage />
+          </ProtectedRoute>
+        ),
+      },
+    ],
   },
 ]);
 

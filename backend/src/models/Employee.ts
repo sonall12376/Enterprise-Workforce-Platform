@@ -42,6 +42,10 @@ export interface IEmployee extends Document {
   }>;
   createdAt: Date;
   updatedAt: Date;
+  resetPasswordToken?: string;
+  resetPasswordExpires?: Date;
+  loginAttempts: number;
+  lockUntil?: Date;
   comparePassword(password: string): Promise<boolean>;
 }
 
@@ -99,6 +103,10 @@ const EmployeeSchema: Schema = new Schema(
         date: { type: Date, default: Date.now },
       },
     ],
+    resetPasswordToken: { type: String },
+    resetPasswordExpires: { type: Date },
+    loginAttempts: { type: Number, required: true, default: 0 },
+    lockUntil: { type: Date },
   },
   { timestamps: true }
 );
