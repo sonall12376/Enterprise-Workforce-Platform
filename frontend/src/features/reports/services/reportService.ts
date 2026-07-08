@@ -26,6 +26,16 @@ export const reportService = {
     const response = await api.get('/reports/dashboard');
     return response.data.data;
   },
+
+  getEmployeeStats: async (): Promise<any> => {
+    const response = await api.get('/reports/employees');
+    return response.data.data;
+  },
+
+  getPayrollStats: async (): Promise<any> => {
+    const response = await api.get('/reports/payroll');
+    return response.data.data;
+  },
 };
 
 export default reportService;

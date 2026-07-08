@@ -86,3 +86,37 @@ export const getDashboardSummary = async (req: AuthenticatedRequest, res: Respon
     });
   }
 };
+
+export const getEmployeeDistribution = async (req: AuthenticatedRequest, res: Response) => {
+  const orgId = (req.user?.orgId || '603d2e1b12cf000000000001') as string;
+  try {
+    const stats = await reportService.getEmployeeDistribution(orgId);
+    return res.status(200).json({
+      status: 'success',
+      data: stats,
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      status: 'error',
+      statusCode: 500,
+      message: error.message || 'Failed to fetch employee distribution',
+    });
+  }
+};
+
+export const getPayrollBudgetStats = async (req: AuthenticatedRequest, res: Response) => {
+  const orgId = (req.user?.orgId || '603d2e1b12cf000000000001') as string;
+  try {
+    const stats = await reportService.getPayrollBudgetStats(orgId);
+    return res.status(200).json({
+      status: 'success',
+      data: stats,
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      status: 'error',
+      statusCode: 500,
+      message: error.message || 'Failed to fetch payroll budget stats',
+    });
+  }
+};

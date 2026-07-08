@@ -3,6 +3,8 @@ import Task from '../models/Task';
 import Asset from '../models/Asset';
 import HelpDeskTicket from '../models/HelpDeskTicket';
 import Employee from '../models/Employee';
+import Department from '../models/Department';
+import mongoose from 'mongoose';
 
 export const reportService = {
   getProjectStats: async (orgId: string): Promise<any> => {
@@ -94,6 +96,46 @@ export const reportService = {
       projectCount,
       taskCount,
     };
+  },
+
+  getEmployeeDistribution: async (orgId: string): Promise<any> => {
+    const distribution = await Employee.aggregate([
+      { $match: { orgId: new mongoose.Types.ObjectId(orgId), status: 'Active' } },
+      { $group: { _id: '$deptId', count: { $sum: 1 } } }
+    ]);
+    const result = [];
+    for (const item of distribution) {
+      if (item._id) {
+        const dept = await Department.findById(item._id);
+        result.push({ label: dept?.name || 'Unknown', value: item.count });
+      } else {
+        result.push({ label: 'Unassigned', value: item.count });
+      }
+    }
+    return result;
+  },
+
+  getPayrollBudgetStats: async (orgId: string): Promise<any> => {
+    const currentYear = new Date().getFullYear();
+    const payrolls = await mongoose.models.Payroll.find({
+      year: currentYear,
+      status: 'Paid'
+    }).populate({ path: 'employeeId', select: 'orgId' });
+
+    const orgPayrolls = payrolls.filter((p: any) => p.employeeId && String(p.employeeId.orgId) === String(orgId));
+
+    const monthlyBudgets = Array(12).fill(0);
+    orgPayrolls.forEach((p: any) => {
+      if (p.month >= 1 && p.month <= 12) {
+        monthlyBudgets[p.month - 1] += p.netPay;
+      }
+    });
+
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return months.map((label, idx) => ({
+      label,
+      value: monthlyBudgets[idx]
+    }));
   },
 };
 

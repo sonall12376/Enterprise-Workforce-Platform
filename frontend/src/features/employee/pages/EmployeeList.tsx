@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../../hooks/useAuth';
 import { useEmployees } from '../hooks/useEmployees';
-import { Search, SlidersHorizontal, Plus, ChevronLeft, ChevronRight, Briefcase, MapPin, Eye, Edit2 } from 'lucide-react';
+import { Search, SlidersHorizontal, Plus, ChevronLeft, ChevronRight, Briefcase, MapPin, Eye, Edit2, Download } from 'lucide-react';
+import employeeService from '../services/employeeService';
 
 export const EmployeeList: React.FC = () => {
   const { user } = useAuth();
@@ -19,6 +20,26 @@ export const EmployeeList: React.FC = () => {
     pagination,
     updateFilters,
   } = useEmployees({ page: 1, limit: 10 });
+
+  const [exporting, setExporting] = useState(false);
+
+  const handleExport = async () => {
+    try {
+      setExporting(true);
+      const blob = await employeeService.exportEmployees();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'workforce_directory.csv');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err: any) {
+      alert(err.message || 'Failed to export employee directory');
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,13 +84,23 @@ export const EmployeeList: React.FC = () => {
           </p>
         </div>
         {canModify && (
-          <Link
-            to="/employees/new"
-            className="flex items-center gap-2 px-5 py-3 rounded-xl text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 font-semibold shadow-lg shadow-indigo-950/40 transition-all duration-200"
-          >
-            <Plus size={18} />
-            Add Employee
-          </Link>
+          <div className="flex gap-3">
+            <button
+              onClick={handleExport}
+              disabled={exporting}
+              className="flex items-center gap-2 px-5 py-3 rounded-xl text-slate-300 hover:text-white bg-slate-900 border border-slate-800 hover:bg-slate-850 hover:border-slate-700 font-semibold shadow-lg transition-all duration-200 cursor-pointer disabled:opacity-50"
+            >
+              <Download size={18} />
+              {exporting ? 'Exporting...' : 'Export Directory'}
+            </button>
+            <Link
+              to="/employees/new"
+              className="flex items-center gap-2 px-5 py-3 rounded-xl text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 font-semibold shadow-lg shadow-indigo-950/40 transition-all duration-200"
+            >
+              <Plus size={18} />
+              Add Employee
+            </Link>
+          </div>
         )}
       </div>
 

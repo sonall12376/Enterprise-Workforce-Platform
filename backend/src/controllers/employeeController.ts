@@ -3,6 +3,7 @@ import { AuthenticatedRequest } from '../middleware/auth';
 import employeeService from '../services/employeeService';
 import { createEmployeeSchema, updateEmployeeSchema } from '../validators/employeeValidator';
 import mongoose from 'mongoose';
+import { Employee } from '../models/Employee';
 
 export const createEmployee = async (req: AuthenticatedRequest, res: Response) => {
   const result = createEmployeeSchema.safeParse(req.body);
@@ -191,5 +192,27 @@ export const getEmployeeMetadata = async (req: AuthenticatedRequest, res: Respon
       statusCode: 500,
       message: error.message || 'Failed to fetch meta parameters',
     });
+  }
+};
+
+export const exportEmployees = async (req: AuthenticatedRequest, res: Response) => {
+  const orgId = req.user?.orgId || '603d2e1b12cf000000000001';
+  try {
+    const employees = await Employee.find({ orgId })
+      .populate({ path: 'deptId', select: 'name' })
+      .populate({ path: 'designationId', select: 'title' });
+    
+    let csv = 'Employee ID,Name,Email,Phone,Department,Designation,Employment Type,Status\n';
+    employees.forEach((emp) => {
+      const dept = emp.deptId as any;
+      const des = emp.designationId as any;
+      csv += `"${emp.employeeId || ''}","${emp.name || ''}","${emp.email || ''}","${emp.phone || ''}","${dept?.name || ''}","${des?.title || ''}","${emp.employmentType || ''}","${emp.status || ''}"\n`;
+    });
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename=workforce_directory.csv');
+    return res.status(200).send(csv);
+  } catch (error: any) {
+    return res.status(500).json({ status: 'error', statusCode: 500, message: error.message });
   }
 };

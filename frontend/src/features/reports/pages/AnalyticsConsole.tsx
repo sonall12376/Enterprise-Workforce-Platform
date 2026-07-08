@@ -157,6 +157,8 @@ export const AnalyticsConsole: React.FC = () => {
   const [taskStats, setTaskStats] = useState<TaskStats | null>(null);
   const [assetStats, setAssetStats] = useState<AssetStats | null>(null);
   const [ticketStats, setTicketStats] = useState<TicketStats | null>(null);
+  const [employeeStats, setEmployeeStats] = useState<{ label: string; value: number }[]>([]);
+  const [payrollStats, setPayrollStats] = useState<{ label: string; value: number }[]>([]);
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -179,18 +181,22 @@ export const AnalyticsConsole: React.FC = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const [sum, proj, task, asset, ticket] = await Promise.all([
+      const [sum, proj, task, asset, ticket, emp, pay] = await Promise.all([
         reportService.getDashboardSummary(),
         reportService.getProjectStats(),
         reportService.getTaskStats(),
         reportService.getAssetStats(),
         reportService.getTicketStats(),
+        reportService.getEmployeeStats(),
+        reportService.getPayrollStats(),
       ]);
       setSummary(sum);
       setProjectStats(proj);
       setTaskStats(task);
       setAssetStats(asset);
       setTicketStats(ticket);
+      setEmployeeStats(emp || []);
+      setPayrollStats(pay || []);
     } catch (err: any) {
       console.error('Failed to load reports metrics:', err);
       setError(err.response?.data?.message || err.message || 'Failed to fetch report aggregates');
@@ -291,6 +297,25 @@ export const AnalyticsConsole: React.FC = () => {
         { label: 'Finance', value: ticketStats.categoryCounts.Finance, color: '#ec4899' },
       ]
     : [];
+
+  // Map employee department stats for pie charts
+  const mappedEmployees = employeeStats.map((item, idx) => {
+    const colors = ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#ef4444'];
+    return {
+      label: item.label,
+      value: item.value,
+      color: colors[idx % colors.length]
+    };
+  });
+
+  // Map payroll budget stats for bar charts
+  const mappedPayroll = payrollStats.map((item) => {
+    return {
+      label: item.label,
+      value: item.value,
+      color: '#10b981'
+    };
+  });
 
   return (
     <div className="min-h-screen bg-[#0b0f19] text-slate-100 font-sans p-6 md:p-10">
@@ -427,6 +452,35 @@ export const AnalyticsConsole: React.FC = () => {
                 <RenderBarChart data={mappedTickets} total={ticketStats.total} />
               </div>
             )}
+          </div>
+
+          {/* Staff & Payroll visual analytics */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Employee department breakdown */}
+            <div className="bg-slate-900/30 border border-slate-800/80 rounded-2xl p-6 space-y-6 shadow-xl">
+              <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                <Users size={16} className="text-violet-400" />
+                Employee Distribution by Department
+              </h3>
+              {mappedEmployees.length === 0 ? (
+                <p className="text-slate-500 text-xs text-center py-10">No active staff distributed across departments.</p>
+              ) : (
+                <RenderPieChart data={mappedEmployees} total={employeeStats.reduce((sum, item) => sum + item.value, 0)} />
+              )}
+            </div>
+
+            {/* Net payroll budget over the year */}
+            <div className="bg-slate-900/30 border border-slate-800/80 rounded-2xl p-6 space-y-6 shadow-xl">
+              <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                <BarChart3 size={16} className="text-emerald-400" />
+                Monthly Net Payroll Budget
+              </h3>
+              {payrollStats.length === 0 ? (
+                <p className="text-slate-500 text-xs text-center py-10">No processed payroll calculations for current year.</p>
+              ) : (
+                <RenderBarChart data={mappedPayroll} total={payrollStats.reduce((sum, item) => sum + item.value, 0)} />
+              )}
+            </div>
           </div>
         </div>
       )}

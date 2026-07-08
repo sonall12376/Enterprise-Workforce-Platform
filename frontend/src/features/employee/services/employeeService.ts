@@ -30,6 +30,11 @@ export const employeeService = {
     const response = await api.get('/employees/metadata');
     return response.data.data;
   },
+
+  exportEmployees: async (): Promise<Blob> => {
+    const response = await api.get('/employees/export', { responseType: 'blob' });
+    return response.data;
+  },
 };
 
 export default employeeService;
