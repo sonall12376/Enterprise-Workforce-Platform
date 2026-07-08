@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { env } from '../config/env';
-import { MongoMemoryServer } from 'mongodb-memory-server';
+import dns from 'dns';
 
 import Department from '../models/Department';
 import Designation from '../models/Designation';
@@ -8,8 +8,6 @@ import OfficeLocation from '../models/OfficeLocation';
 import WorkShift from '../models/WorkShift';
 import Employee from '../models/Employee';
 import Candidate from '../models/Candidate';
-
-let mongod: MongoMemoryServer | null = null;
 
 const seedDatabase = async () => {
   const orgId = new mongoose.Types.ObjectId('603d2e1b12cf000000000001');
@@ -631,22 +629,35 @@ const seedDatabase = async () => {
 
 export const connectDatabase = async (): Promise<void> => {
   try {
-    let uri = env.MONGODB_URI;
+    const uri = env.MONGODB_URI;
 
-    if (env.NODE_ENV === 'development' && (uri.includes('localhost') || uri.includes('127.0.0.1') || uri.includes('::1'))) {
-      console.log('🔄 Starting MongoMemoryServer for zero-dependency development...');
-      mongod = await MongoMemoryServer.create();
-      uri = mongod.getUri();
-      console.log(`ℹ️ MongoMemoryServer started with URI: ${uri}`);
+    // Apply DNS resolution override to solve querySrv ECONNREFUSED in restricted network sandboxes
+    try {
+      console.log('🔄 Configuring system DNS servers to Google DNS (8.8.8.8) to resolve Atlas SRV...');
+      dns.setServers(['8.8.8.8', '8.8.4.4']);
+    } catch (dnsErr) {
+      console.warn('⚠️ Unable to set custom DNS servers, continuing with system defaults:', dnsErr);
     }
 
+    mongoose.connection.on('disconnected', () => {
+      console.log('⚠️ MongoDB Atlas Disconnected! Attempting to reconnect...');
+    });
+
+    mongoose.connection.on('reconnected', () => {
+      console.log('✅ MongoDB Atlas Reconnected Successfully');
+    });
+
+    mongoose.connection.on('error', (err) => {
+      console.error(`❌ MongoDB Atlas runtime error: ${err.message}`);
+    });
+
     const conn = await mongoose.connect(uri);
-    console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
+    console.log(`✅ MongoDB Atlas Connected Successfully: ${conn.connection.host}`);
 
     // Seed master and metadata defaults
     await seedDatabase();
   } catch (error) {
-    console.error(`❌ MongoDB connection error: ${(error as Error).message}`);
+    console.error(`❌ Failed to connect to MongoDB Atlas: ${(error as Error).message}`);
     process.exit(1);
   }
 };
@@ -654,10 +665,6 @@ export const connectDatabase = async (): Promise<void> => {
 export const disconnectDatabase = async (): Promise<void> => {
   try {
     await mongoose.disconnect();
-    if (mongod) {
-      await mongod.stop();
-      console.log('✅ MongoMemoryServer stopped');
-    }
     console.log('✅ MongoDB Disconnected');
   } catch (error) {
     console.error(`❌ Error disconnecting MongoDB: ${(error as Error).message}`);
