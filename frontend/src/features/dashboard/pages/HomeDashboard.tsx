@@ -13,6 +13,7 @@ export function HomeDashboard() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
+  alert("Logout button clicked");
   console.log("Logout button clicked");
   logout();
   navigate("/login");
