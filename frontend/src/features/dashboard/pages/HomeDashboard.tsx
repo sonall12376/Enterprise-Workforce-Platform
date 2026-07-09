@@ -133,12 +133,12 @@ export function HomeDashboard() {
           </div>
         </div>
 
-        <button
+        {/* <button
           onClick={handleLogout}
           className="w-full md:w-auto py-2.5 px-6 bg-slate-900/60 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-md"
         >
           Sign Out of Workspace
-        </button>
+        </button> */}
       </div>
 
       {/* DASHBOARDS SECTIONS */}
