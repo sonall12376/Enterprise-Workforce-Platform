@@ -13,11 +13,9 @@ export function HomeDashboard() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-  alert("Logout button clicked");
-  console.log("Logout button clicked");
-  logout();
-  navigate("/login");
-};
+    logout();
+    navigate('/login');
+  };
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<any>({
     employeeCount: 0,
